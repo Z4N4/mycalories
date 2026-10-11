@@ -11,6 +11,7 @@ import { LANG_LABELS } from '../i18n/strings.js';
 import { profileForm } from './profileForm.js';
 import { openCustomFood } from '../sheets/customFood.js';
 import { exportBackup, importBackup } from './backup.js';
+import { aiSection } from './aiSettings.js';
 
 function section(title, iconName, ...children) {
   return h('section', { class: 'card stack' }, h('h2', { class: 'section-title' }, icon(iconName), title), ...children);
@@ -126,6 +127,7 @@ export function renderSettings(app) {
         (code) => app.commit(setSettings(app.state, { lang: code })), 'lang-seg')),
     goalSection(app),
     profileSection(app),
+    aiSection(app),
     myFoodsSection(app),
     dataSection(app),
     section(t('about'), 'info',

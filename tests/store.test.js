@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   createInitialState, addEntry, updateEntry, removeEntry, copyMeal, toggleFavorite,
   saveCustomFood, deleteCustomFood, setOverride, clearOverride, setWeight, removeWeight,
-  setProfile, setSettings, parseBackup, MAX_RECENT,
+  setProfile, setSettings, parseBackup, findCustomByBarcode, MAX_RECENT,
 } from '../js/core/store.js';
 
 const entry = (over = {}) => ({
@@ -65,6 +65,25 @@ test('custom foods can be saved, updated and deleted', () => {
   const s3 = deleteCustomFood(s2, food.id);
   assert.equal(s3.customFoods.length, 0);
   assert.deepEqual(s3.favorites, []);
+});
+
+test('findCustomByBarcode finds a saved product', () => {
+  const s = saveCustomFood(createInitialState(), { name: 'Juice', barcode: '5449000000996', kcal: 100, p: 0, c: 25, f: 0, servingG: 250 });
+  assert.equal(findCustomByBarcode(s, '5449000000996').name, 'Juice');
+  assert.equal(findCustomByBarcode(s, '96385074'), undefined);
+});
+
+test('parseBackup keeps a valid barcode and drops a bad one', () => {
+  const raw = {
+    version: 1,
+    customFoods: [
+      { id: 'c_a', name: 'A', barcode: '5449000000996', kcal: 1, p: 0, c: 0, f: 0 },
+      { id: 'c_b', name: 'B', barcode: '<script>', kcal: 1, p: 0, c: 0, f: 0 },
+    ],
+  };
+  const s = parseBackup(JSON.stringify(raw));
+  assert.equal(s.customFoods[0].barcode, '5449000000996');
+  assert.equal(s.customFoods[1].barcode, '');
 });
 
 test('overrides can be set and cleared', () => {

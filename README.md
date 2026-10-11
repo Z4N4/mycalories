@@ -14,6 +14,12 @@ It runs as a web app that you add to your iPhone Home Screen. Once installed, it
 - **Week view** (Saturday → Friday): bar chart, weekly total vs weekly goal, daily average
 - **Month view**: calendar with every day colored green (within goal) or orange (over)
 - **Weight tracking** with a chart
+- **Barcode scanning**: live camera, typed number, or a photo of the barcode. Products come from the free
+  [Open Food Facts](https://world.openfoodfacts.org) database; unknown products are entered once from the label
+  and remembered (works offline after that)
+- **Calories from a photo**: Google Gemini (free tier) recognizes the dishes, matches them to the food list and
+  estimates the grams. You check the amounts before anything is added. Needs a free key from
+  [aistudio.google.com/apikey](https://aistudio.google.com/apikey), entered in Settings and stored only on the phone
 - **Favorites, recent foods, and your own foods**; you can also change the numbers of any built-in dish
 - **Private**: everything stays on your phone. **Backup / restore** as a file from Settings
 - Light and dark mode follow the iPhone setting
@@ -52,6 +58,8 @@ npm run serve          # http://localhost:5173
 | `js/i18n/` | All text in Badini, Arabic, English |
 | `js/views/`, `js/sheets/` | Screens and bottom sheets |
 | `js/ui/` | DOM helper, icons, charts, sheets, form controls |
+| `js/services/` | Network: Open Food Facts lookup, Gemini photo analysis, photo resizing |
+| `vendor/` | [@zxing/library](https://github.com/zxing-js/library) 0.23 barcode decoder (Apache-2.0), loaded on demand |
 | `tools/` | Local server and icon generator |
 
 When you change any file, bump `CACHE` in `sw.js` so installed phones download the new version.

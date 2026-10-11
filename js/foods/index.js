@@ -37,7 +37,7 @@ export function customToFood(c) {
   const g = hasGrams ? c.servingG : 100;
   const scale = (v) => (v * 100) / g;
   return {
-    id: c.id, cat: 'custom', custom: true, name: c.name, keys: '',
+    id: c.id, cat: 'custom', custom: true, name: c.name, keys: c.barcode ?? '',
     per100: { kcal: scale(c.kcal), p: scale(c.p), c: scale(c.c), f: scale(c.f) },
     portions: [{ unit: 'serving', g, label: c.servingName || '' }],
     grams: hasGrams,

@@ -1,7 +1,7 @@
 // Service worker: keeps a copy of the app on the phone so it opens offline.
 // Bump CACHE whenever any file changes so phones pick up the new version.
 
-const CACHE = 'mycalories-v1';
+const CACHE = 'mycalories-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -12,9 +12,11 @@ const ASSETS = [
   './icons/apple-touch-icon.png',
   './icons/icon-maskable-512.png',
   './js/app.js',
+  './js/core/barcode.js',
   './js/core/calc.js',
   './js/core/dates.js',
   './js/core/persist.js',
+  './js/core/photoAi.js',
   './js/core/search.js',
   './js/core/store.js',
   './js/foods/index.js',
@@ -29,6 +31,7 @@ const ASSETS = [
   './js/ui/icons.js',
   './js/ui/labels.js',
   './js/ui/sheet.js',
+  './js/views/aiSettings.js',
   './js/views/backup.js',
   './js/views/month.js',
   './js/views/onboarding.js',
@@ -38,9 +41,15 @@ const ASSETS = [
   './js/views/week.js',
   './js/views/weight.js',
   './js/sheets/addFood.js',
+  './js/sheets/barcodeScanner.js',
   './js/sheets/customFood.js',
   './js/sheets/foodDetail.js',
   './js/sheets/overrideEditor.js',
+  './js/sheets/photoFood.js',
+  './js/services/gemini.js',
+  './js/services/image.js',
+  './js/services/openFoodFacts.js',
+  './vendor/zxing.min.js',
 ];
 
 const NETWORK_TIMEOUT_MS = 3000;

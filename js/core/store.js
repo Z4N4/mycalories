@@ -71,6 +71,10 @@ export function saveCustomFood(state, food) {
   return { ...state, customFoods };
 }
 
+export function findCustomByBarcode(state, barcode) {
+  return state.customFoods.find((f) => f.barcode && f.barcode === barcode);
+}
+
 export function deleteCustomFood(state, id) {
   return {
     ...state,
@@ -146,12 +150,14 @@ function cleanLog(log) {
 
 function cleanCustomFood(f) {
   if (!isObj(f) || typeof f.id !== 'string' || !f.id.startsWith('c_') || typeof f.name !== 'string') return null;
-  if (![f.kcal, f.p, f.c, f.f].every((v) => inRange(v, 0, 10000))) return null;
+  // 30000 covers a big scanned package (3 kg at 900 kcal/100 g)
+  if (![f.kcal, f.p, f.c, f.f].every((v) => inRange(v, 0, 30000))) return null;
   const servingG = f.servingG ?? 0;
   if (!(servingG === 0 || inRange(servingG, 1, 3000))) return null;
   return {
     id: f.id, name: f.name.slice(0, 80),
     servingName: typeof f.servingName === 'string' ? f.servingName.slice(0, 30) : '',
+    barcode: typeof f.barcode === 'string' && /^\d{6,14}$/.test(f.barcode) ? f.barcode : '',
     servingG, kcal: f.kcal, p: f.p, c: f.c, f: f.f,
   };
 }

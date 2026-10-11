@@ -13,9 +13,11 @@ const MAX_GRAMS = 3000;
 /**
  * @param {object|null} existing stored custom food, or null to create one
  * @param {(food?: object) => void} [onDone] gets the saved food (as shown in lists)
+ * @param {{barcode?: string}} [prefill] e.g. a scanned barcode that wasn't found online
  */
-export function openCustomFood(app, existing, onDone) {
+export function openCustomFood(app, existing, onDone, prefill = {}) {
   const { t } = app.d;
+  const barcode = existing?.barcode || prefill.barcode || '';
   const optional = `(${t('optional')})`;
   const val = (v) => (v == null || v === 0 ? '' : fmt1(v));
   const name = textField({ id: 'cf-name', label: t('foodName'), value: existing?.name });
@@ -43,6 +45,7 @@ export function openCustomFood(app, existing, onDone) {
     const food = {
       ...(existing ?? {}),
       name: name.input.value.trim(),
+      barcode,
       servingName: servingName.input.value.trim(),
       servingG: num(servingG, MAX_GRAMS),
       kcal: num(kcal, MAX_KCAL, { required: true }),
@@ -71,6 +74,7 @@ export function openCustomFood(app, existing, onDone) {
     title: existing ? existing.name : t('createFood'),
     closeLabel: t('close'),
     body: h('div', { class: 'stack' },
+      barcode && h('p', { class: 'muted small' }, icon('barcode'), ` ${t('barcode')}: `, h('bdi', { dir: 'ltr' }, barcode)),
       name.el,
       h('div', { class: 'grid-2' }, servingName.el, servingG.el),
       h('h3', { class: 'section-title small' }, t('perServing')),

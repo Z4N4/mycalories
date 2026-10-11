@@ -24,7 +24,7 @@ function titleNode(app, food, onToggle) {
   const fav = app.state.favorites.includes(food.id);
   return h('span', { class: 'detail-title' },
     h('span', null, foodName(food, lang)),
-    h('button', {
+    !food.adhoc && h('button', {
       class: `icon-btn star${fav ? ' on' : ''}`, 'aria-pressed': String(fav), 'aria-label': t('favorites'), onClick: onToggle,
     }, icon('star')));
 }
@@ -150,13 +150,15 @@ export function openFoodDetail(app, { food: startFood, dateKey, meal: startMeal,
     },
   }, icon('trash'), t('delete'));
 
-  const editLink = food.custom
+  let editLink;
+  if (food.adhoc) editLink = '';
+  else editLink = food.custom
     ? h('button', { class: 'link-btn', onClick: () => openCustomFood(app, app.state.customFoods.find((c) => c.id === food.id), onFoodValuesChanged) }, icon('edit'), t('edit'))
     : overrideEditor(app, food, onFoodValuesChanged);
 
   const body = h('div', { class: 'stack detail' },
     h('div', { class: 'detail-meta muted' },
-      CATEGORY_NAMES[food.cat]?.[lang] ?? '',
+      food.adhoc ? '' : (CATEGORY_NAMES[food.cat]?.[lang] ?? ''),
       food.edited ? h('span', { class: 'badge' }, t('editedBadge')) : ''),
     h('div', { class: 'field' }, h('span', { class: 'field-label' }, t('portion')), unitsEl),
     h('div', { class: 'field' },
@@ -184,11 +186,30 @@ export function openFoodDetail(app, { food: startFood, dateKey, meal: startMeal,
   renderPreview();
 }
 
+/**
+ * A stand-in food rebuilt from the entry itself, for entries whose food isn't in
+ * the list (e.g. "other" foods from a photo), so their grams can still be edited.
+ */
+function adhocFood(entry, lang) {
+  const factor = 100 / entry.grams;
+  const name = typeof entry.name === 'string' ? entry.name : (entry.name?.[lang] || entry.name?.en || '?');
+  return {
+    id: entry.foodId, cat: 'custom', custom: true, adhoc: true, name, keys: '',
+    per100: { kcal: entry.kcal * factor, p: entry.p * factor, c: entry.c * factor, f: entry.f * factor },
+    portions: [{ unit: 'serving', g: 100 }], grams: true,
+  };
+}
+
 /** Open an existing diary entry for editing. */
 export function openEntry(app, dateKey, entry) {
   const food = app.d.foodsById.get(entry.foodId);
   if (food) {
     openFoodDetail(app, { food, dateKey, meal: entry.meal, entry });
+    return;
+  }
+  if (entry.grams > 0) {
+    const stored = entry.unit === 'g' ? entry : { ...entry, unit: 'g', qty: entry.grams };
+    openFoodDetail(app, { food: adhocFood(entry, app.d.lang), dateKey, meal: entry.meal, entry: stored });
     return;
   }
   // The food was deleted: only allow removing the entry.

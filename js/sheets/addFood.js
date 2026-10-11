@@ -10,6 +10,8 @@ import { CATEGORIES, foodName } from '../foods/index.js';
 import { CATEGORY_NAMES, MEAL_NAMES } from '../i18n/strings.js';
 import { openFoodDetail } from './foodDetail.js';
 import { openCustomFood } from './customFood.js';
+import { openBarcodeScanner } from './barcodeScanner.js';
+import { openPhotoFood } from './photoFood.js';
 
 const MAX_SEARCH_RESULTS = 80;
 
@@ -109,6 +111,11 @@ export function openAddFood(app, dateKey, meal) {
     closeLabel: t('close'),
     tall: true,
     body: h('div', { class: 'add-food' },
+      h('div', { class: 'quick-actions' },
+        h('button', { class: 'quick-btn', onClick: () => openBarcodeScanner(app, { dateKey, meal, onChange: refresh }) },
+          icon('barcode'), t('scanBarcode')),
+        h('button', { class: 'quick-btn', onClick: () => openPhotoFood(app, { dateKey, meal, onChange: refresh }) },
+          icon('camera'), t('photo'))),
       h('div', { class: 'search-wrap' }, icon('search', 'search-icon'), input),
       chipsEl,
       listEl),
