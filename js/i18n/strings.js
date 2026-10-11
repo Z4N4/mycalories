@@ -1,0 +1,238 @@
+// All visible text in Kurdish Badini (ku), Arabic (ar) and English (en).
+// Each entry is [ku, ar, en].
+
+const S = {
+  appName: ['MyCalories', 'MyCalories', 'MyCalories'],
+  today: ['ئەڤرۆ', 'اليوم', 'Today'],
+  yesterday: ['دوهی', 'أمس', 'Yesterday'],
+  tomorrow: ['سوبەهی', 'غداً', 'Tomorrow'],
+  tabToday: ['ئەڤرۆ', 'اليوم', 'Today'],
+  tabWeek: ['حەفتی', 'الأسبوع', 'Week'],
+  tabMonth: ['هەیڤ', 'الشهر', 'Month'],
+  tabWeight: ['کێش', 'الوزن', 'Weight'],
+  tabSettings: ['ڕێکخستن', 'الإعدادات', 'Settings'],
+
+  eaten: ['خواری', 'أكلت', 'Eaten'],
+  remaining: ['مای', 'المتبقي', 'Left'],
+  over: ['زێدەتر', 'زيادة', 'Over'],
+  goal: ['ئارمانج', 'الهدف', 'Goal'],
+  kcal: ['کالۆری', 'سعرة', 'kcal'],
+  protein: ['پرۆتین', 'بروتين', 'Protein'],
+  carbs: ['کاربۆهیدرات', 'كربوهيدرات', 'Carbs'],
+  fat: ['چەوری', 'دهون', 'Fat'],
+  gramShort: ['گم', 'غ', 'g'],
+  kg: ['کگم', 'كغم', 'kg'],
+  cm: ['سم', 'سم', 'cm'],
+  years: ['سال', 'سنة', 'years'],
+
+  add: ['زێدە بکە', 'أضف', 'Add'],
+  addFood: ['خوارنێ زێدە بکە', 'أضف طعام', 'Add food'],
+  save: ['پاشەکەفت بکە', 'حفظ', 'Save'],
+  cancel: ['پاشگەزبوون', 'إلغاء', 'Cancel'],
+  delete: ['ژێببە', 'حذف', 'Delete'],
+  edit: ['دەستکاری', 'تعديل', 'Edit'],
+  close: ['گرتن', 'إغلاق', 'Close'],
+  next: ['پاشتر', 'التالي', 'Next'],
+  back: ['زڤڕین', 'رجوع', 'Back'],
+  start: ['دەستپێبکە', 'ابدأ', 'Start'],
+  update: ['نووکرن', 'تحديث', 'Update'],
+
+  searchPlaceholder: ['ل خوارنێ بگەڕێ… (دۆلمە، dolma، دولمة)', 'ابحث عن طعام… (دولمة، dolma)', 'Search food… (dolma, دولمة, دۆلمە)'],
+  recent: ['دوماهیک', 'الأخيرة', 'Recent'],
+  favorites: ['حەزلێکری', 'المفضلة', 'Favorites'],
+  myFoods: ['خوارنێن من', 'أطعمتي', 'My foods'],
+  all: ['هەمی', 'الكل', 'All'],
+  noResults: ['چ نەهاتە دیتن', 'لا توجد نتائج', 'Nothing found'],
+  noRecent: ['هێشتا چ خوارن نەهاتینە تۆمارکرن', 'لم تسجل أي طعام بعد', 'You haven\'t logged any food yet'],
+  noFavorites: ['ل سەر ⭐ بدە دا خوارن ل ڤێرە بن', 'اضغط ⭐ على أي طعام ليظهر هنا', 'Tap ⭐ on any food to keep it here'],
+  noMyFoods: ['هێشتا تە چ خوارن دروست نەکرینە', 'لم تنشئ أي طعام بعد', 'You haven\'t created any foods yet'],
+  createFood: ['خوارنەکا نوو دروست بکە', 'أنشئ طعاماً جديداً', 'Create a new food'],
+  nothingYet: ['هێشتا چ نینە', 'لا شيء بعد', 'Nothing yet'],
+  copyYesterday: ['ژ دوهی کۆپی بکە', 'انسخ من أمس', 'Copy from yesterday'],
+  copiedN: ['{n} خوارن هاتنە کۆپیکرن', 'تم نسخ {n} أطعمة', '{n} foods copied'],
+  nothingToCopy: ['دوهی چ د ڤێ ژەمێ دا نەبوو', 'لا يوجد شيء في هذه الوجبة أمس', 'Nothing in this meal yesterday'],
+  added: ['هاتە زێدەکرن ✓', 'تمت الإضافة ✓', 'Added ✓'],
+  saved: ['هاتە پاشەکەفتکرن ✓', 'تم الحفظ ✓', 'Saved ✓'],
+  deleted: ['هاتە ژێبرن', 'تم الحذف', 'Deleted'],
+  undo: ['زڤڕاندن', 'تراجع', 'Undo'],
+
+  portion: ['پشک', 'الحصة', 'Portion'],
+  quantity: ['چەند', 'الكمية', 'Amount'],
+  grams: ['گرام', 'غرام', 'Grams'],
+  meal: ['ژەم', 'الوجبة', 'Meal'],
+  per100: ['بۆ هەر 100 گرامان', 'لكل 100 غرام', 'Per 100 g'],
+  editValues: ['ژمارێن ڤێ خوارنێ بگوهۆڕە', 'عدّل قيم هذا الطعام', 'Change this food\'s numbers'],
+  resetValues: ['ژمارێن ئەسلی بزڤڕینە', 'أرجع القيم الأصلية', 'Restore original numbers'],
+  editedBadge: ['هاتیە گوهۆڕین', 'معدّل', 'edited'],
+  estimateNote: ['ژمارە نێزیکن؛ ل دویڤ ڕۆن و گۆشتێ د خوارنێ دا دگوهۆڕن.', 'القيم تقريبية وتختلف حسب الدهن واللحم في الطبخ.', 'Values are estimates; they change with the oil and meat used.'],
+  removeFromDay: ['ژ ڤێ ڕۆژێ ژێببە', 'احذف من هذا اليوم', 'Remove from this day'],
+
+  weekTotal: ['کۆمێ حەفتیێ', 'مجموع الأسبوع', 'Week total'],
+  weekGoal: ['ئارمانجا حەفتیێ', 'هدف الأسبوع', 'Week goal'],
+  dailyAverage: ['تێکڕایێ ڕۆژانە', 'المعدل اليومي', 'Daily average'],
+  daysOver: ['ڕۆژێن زێدەتر ژ ئارمانجێ', 'أيام فوق الهدف', 'Days over goal'],
+  loggedDays: ['ڕۆژێن تۆمارکری', 'الأيام المسجلة', 'Days logged'],
+  avgMacros: ['تێکڕایێ ڕۆژانە یێ پرۆتین / کاربۆهیدرات / چەوری', 'معدل البروتين / الكربوهيدرات / الدهون يومياً', 'Average protein / carbs / fat per day'],
+  thisWeek: ['ئەڤ حەفتیە', 'هذا الأسبوع', 'This week'],
+  monthTotal: ['کۆمێ هەیڤێ', 'مجموع الشهر', 'Month total'],
+  tapDayHint: ['ل سەر ڕۆژەکێ بدە دا ببینی تە چ خواریە', 'اضغط على أي يوم لترى ما أكلت', 'Tap a day to see what you ate'],
+  underGoal: ['د ناڤ ئارمانجێ دا', 'ضمن الهدف', 'Within goal'],
+  overGoal: ['زێدەتر ژ ئارمانجێ', 'فوق الهدف', 'Over goal'],
+  noData: ['چ نەهاتیە تۆمارکرن', 'غير مسجل', 'Not logged'],
+
+  logWeight: ['کێشا خۆ تۆمار بکە', 'سجّل وزنك', 'Log your weight'],
+  currentWeight: ['کێشا نوکە', 'الوزن الحالي', 'Current'],
+  startWeight: ['دەستپێک', 'البداية', 'Start'],
+  change: ['گوهۆڕین', 'التغيير', 'Change'],
+  noWeights: ['هێشتا چ کێش نەهاتینە تۆمارکرن', 'لم تسجل أي وزن بعد', 'No weights logged yet'],
+  history: ['مێژوو', 'السجل', 'History'],
+  date: ['ڕێکەفت', 'التاريخ', 'Date'],
+
+  language: ['زمان', 'اللغة', 'Language'],
+  profile: ['زانیاریێن تە', 'معلوماتك', 'Your details'],
+  dailyGoal: ['ئارمانجا ڕۆژانە', 'الهدف اليومي', 'Daily goal'],
+  sex: ['ڕەگەز', 'الجنس', 'Sex'],
+  male: ['نێر', 'ذكر', 'Male'],
+  female: ['مێ', 'أنثى', 'Female'],
+  age: ['تەمەن', 'العمر', 'Age'],
+  height: ['درێژاهی', 'الطول', 'Height'],
+  weight: ['کێش', 'الوزن', 'Weight'],
+  activity: ['چالاکی', 'النشاط', 'Activity'],
+  act_sedentary: ['کێم لڤین (کارێ ل سەر مێزێ)', 'قليل الحركة (عمل مكتبي)', 'Little movement (desk job)'],
+  act_light: ['وەرزش 1-3 ڕۆژان د حەفتیێ دا', 'رياضة 1-3 أيام بالأسبوع', 'Exercise 1-3 days a week'],
+  act_moderate: ['وەرزش 3-5 ڕۆژان د حەفتیێ دا', 'رياضة 3-5 أيام بالأسبوع', 'Exercise 3-5 days a week'],
+  act_active: ['وەرزش 6-7 ڕۆژان د حەفتیێ دا', 'رياضة 6-7 أيام بالأسبوع', 'Exercise 6-7 days a week'],
+  act_veryActive: ['کارێ لەشی یێ گران', 'عمل بدني شاق', 'Hard physical work'],
+  goalType: ['تە چ دڤێت؟', 'ما هو هدفك؟', 'What is your goal?'],
+  goal_lose: ['کێش کێم بکەم', 'إنقاص الوزن', 'Lose weight'],
+  goal_keep: ['کێشا خۆ بپارێزم', 'الحفاظ على الوزن', 'Keep my weight'],
+  goal_gain: ['کێش زێدە بکەم', 'زيادة الوزن', 'Gain weight'],
+  goal_lose_hint: ['نێزیکی 0.5 کگم د حەفتیێ دا', 'حوالي 0.5 كغم بالأسبوع', 'About 0.5 kg per week'],
+  goal_gain_hint: ['هێدی هێدی، بێ چەوریا زێدە', 'ببطء وبدون دهون زائدة', 'Slowly, without extra fat'],
+  calculatedGoal: ['ئارمانجا هاتیە حسابکرن', 'الهدف المحسوب', 'Calculated goal'],
+  useMyOwnGoal: ['ژمارەیا خۆ بکاربینە', 'استخدم رقمي الخاص', 'Use my own number'],
+  useCalculated: ['ئارمانجا حسابکری بکاربینە', 'استخدم الهدف المحسوب', 'Use calculated goal'],
+  goalPerDay: ['{n} کالۆری ڕۆژانە', '{n} سعرة يومياً', '{n} kcal per day'],
+  macroTargets: ['ئارمانجێن پرۆتین / کاربۆهیدرات / چەوری', 'أهداف البروتين / الكربوهيدرات / الدهون', 'Protein / carbs / fat targets'],
+
+  backup: ['پاشەکەفتا داتایان', 'نسخة احتياطية', 'Backup'],
+  backupHint: ['هەمی داتایێن تە تنێ ل سەر ڤێ مۆبایلێ نە. بۆ پاراستنێ جاران فایلەکێ پاشەکەفت بکە.', 'كل بياناتك محفوظة على هذا الهاتف فقط. احفظ نسخة احتياطية من وقت لآخر.', 'All your data lives only on this phone. Save a backup file now and then.'],
+  exportData: ['فایلێ پاشەکەفتێ دروست بکە', 'تصدير نسخة احتياطية', 'Export backup'],
+  importData: ['فایلێ پاشەکەفتێ ڤەگەڕینە', 'استيراد نسخة احتياطية', 'Import backup'],
+  importConfirm: ['ئەڤە دێ هەمی داتایێن نوکە گوهۆڕیت. بەردەوام بی؟', 'سيستبدل هذا كل بياناتك الحالية. هل تريد المتابعة؟', 'This replaces all your current data. Continue?'],
+  importDone: ['داتا هاتنە ڤەگەڕاندن ✓', 'تمت استعادة البيانات ✓', 'Data restored ✓'],
+  importFailed: ['ئەڤ فایلە نە فایلێ پاشەکەفتا MyCalories یە', 'هذا الملف ليس نسخة احتياطية من MyCalories', 'This file is not a MyCalories backup'],
+  resetAll: ['هەمی داتایان ژێببە', 'احذف كل البيانات', 'Delete all data'],
+  resetConfirm: ['ئەرێ تو پشتڕاستی؟ هەمی تۆمار دێ هێنە ژێبرن و نەزڤڕن.', 'هل أنت متأكد؟ سيتم حذف كل السجلات نهائياً.', 'Are you sure? Every record will be deleted for good.'],
+  about: ['دەربارە', 'حول التطبيق', 'About'],
+  disclaimer: ['کالۆریێن خوارنێن ناڤماڵێ نێزیکن. ئەڤ ئەپە نە شیرەتا پزیشکی یە.', 'سعرات الأكلات المنزلية تقريبية. هذا التطبيق ليس نصيحة طبية.', 'Calories for home cooking are estimates. This app is not medical advice.'],
+  manageMyFoods: ['خوارنێن من ڕێکبخە', 'إدارة أطعمتي', 'Manage my foods'],
+
+  welcome: ['بخێر بێی بۆ MyCalories', 'أهلاً بك في MyCalories', 'Welcome to MyCalories'],
+  welcomeText: ['کالۆریێن خوارنێن عێراقی و کوردی بژمێرە، ڕۆژانە و حەفتیانە.', 'احسب سعرات الأكلات العراقية والكردية يومياً وأسبوعياً.', 'Count calories of Iraqi and Kurdish food, daily and weekly.'],
+  chooseLanguage: ['زمانەکێ هەلبژێرە', 'اختر اللغة', 'Choose a language'],
+  aboutYou: ['دەربارەی تە', 'عنك', 'About you'],
+  aboutYouHint: ['ئەڤ زانیاریە تنێ بۆ حسابکرنا ئارمانجا تە نە و ژ مۆبایلێ دەرناکەڤن.', 'هذه المعلومات لحساب هدفك فقط ولا تغادر هاتفك.', 'Used only to calculate your goal. It never leaves your phone.'],
+  yourResult: ['ئارمانجا تە یا ڕۆژانە', 'هدفك اليومي', 'Your daily goal'],
+  resultHint: ['تو دشێی پاشی ڤێ ژمارێ ژ ڕێکخستنان بگوهۆڕی.', 'يمكنك تغيير هذا الرقم لاحقاً من الإعدادات.', 'You can change this later in Settings.'],
+
+  customFood: ['خوارنا من', 'طعامي', 'My food'],
+  foodName: ['ناڤێ خوارنێ', 'اسم الطعام', 'Food name'],
+  servingName: ['ناڤێ پشکێ (وەک: قاپەک، پارچەک)', 'اسم الحصة (مثل: صحن، قطعة)', 'Serving name (e.g. plate, piece)'],
+  servingGrams: ['کێشا پشکێ ب گرامان', 'وزن الحصة بالغرام', 'Serving weight in grams'],
+  perServing: ['بۆ ئێک پشک', 'لكل حصة', 'For one serving'],
+  optional: ['ب دلێ خۆ', 'اختياري', 'optional'],
+  errName: ['ناڤەکی بنڤیسە', 'اكتب اسماً', 'Enter a name'],
+  errNumber: ['ژمارەکا دروست بنڤیسە', 'أدخل رقماً صحيحاً', 'Enter a valid number'],
+  deleteFoodConfirm: ['ئەڤێ خوارنێ ژێببەی؟ تۆمارێن کەڤن دێ مینن.', 'حذف هذا الطعام؟ ستبقى السجلات القديمة.', 'Delete this food? Old records stay.'],
+  saveFailed: ['⚠️ نەشیا ل سەر ڤێ مۆبایلێ پاشەکەفت بکەت. ژ ڕێکخستنان فایلێ پاشەکەفتێ دروست بکە.', '⚠️ تعذّر الحفظ على هذا الهاتف. صدّر نسخة احتياطية من الإعدادات.', '⚠️ Could not save on this phone. Export a backup in Settings.'],
+  dataCorrupt: ['⚠️ داتایێن پاشەکەفتکری نەهاتنە خواندن. کۆپیەک هاتە پاراستن.', '⚠️ تعذّرت قراءة البيانات المحفوظة. تم الاحتفاظ بنسخة.', '⚠️ Saved data could not be read. A copy was kept.'],
+  storageBlocked: ['⚠️ ئەڤ وێبگەڕە ڕێکێ نادەت پاشەکەفتکرنێ. تۆمارێن تە نامینن.', '⚠️ هذا المتصفح يمنع الحفظ. لن تُحفظ سجلاتك.', '⚠️ This browser blocks storage. Your entries will not be saved.'],
+  installHint: ['بۆ دانانێ ل سەر شاشێ: ل Safari ل سەر ⬆️ بدە پاشی «Add to Home Screen».', 'للتثبيت: في Safari اضغط ⬆️ ثم «Add to Home Screen».', 'To install: in Safari tap ⬆️ then "Add to Home Screen".'],
+};
+
+const LANG_INDEX = { ku: 0, ar: 1, en: 2 };
+
+export const MEAL_NAMES = {
+  breakfast: { ku: 'تێشت', ar: 'الفطور', en: 'Breakfast' },
+  lunch: { ku: 'فراڤین', ar: 'الغداء', en: 'Lunch' },
+  dinner: { ku: 'شیڤ', ar: 'العشاء', en: 'Dinner' },
+  snacks: { ku: 'سڤکاهی', ar: 'وجبات خفيفة', en: 'Snacks' },
+};
+
+export const UNIT_NAMES = {
+  plate: { ku: 'قاپ', ar: 'صحن', en: 'plate' },
+  halfPlate: { ku: 'نیڤ قاپ', ar: 'نصف صحن', en: 'half plate' },
+  piece: { ku: 'دانە', ar: 'قطعة', en: 'piece' },
+  cup: { ku: 'کوپ', ar: 'كوب', en: 'cup' },
+  glass: { ku: 'پەرداخ', ar: 'قدح', en: 'glass' },
+  teaGlass: { ku: 'ئیستکان', ar: 'استكان', en: 'tea glass' },
+  bowl: { ku: 'کاسە', ar: 'طاسة', en: 'bowl' },
+  tbsp: { ku: 'کەڤچیێ مەزن', ar: 'ملعقة كبيرة', en: 'tablespoon' },
+  tsp: { ku: 'کەڤچیێ بچویک', ar: 'ملعقة صغيرة', en: 'teaspoon' },
+  slice: { ku: 'شریحە', ar: 'شريحة', en: 'slice' },
+  skewer: { ku: 'شیش', ar: 'شيش', en: 'skewer' },
+  sandwich: { ku: 'ساندویچ', ar: 'لفة', en: 'sandwich' },
+  can: { ku: 'قوتی', ar: 'علبة', en: 'can' },
+  bottle: { ku: 'بۆتل', ar: 'قنينة', en: 'bottle' },
+  bag: { ku: 'کیس', ar: 'كيس', en: 'bag' },
+  scoop: { ku: 'تۆپ', ar: 'كرة', en: 'scoop' },
+  small: { ku: 'بچویک', ar: 'صغير', en: 'small' },
+  medium: { ku: 'ناڤنجی', ar: 'وسط', en: 'medium' },
+  large: { ku: 'مەزن', ar: 'كبير', en: 'large' },
+  handful: { ku: 'مستەک', ar: 'حفنة', en: 'handful' },
+  serving: { ku: 'پشک', ar: 'حصة', en: 'serving' },
+  g: { ku: 'گرام', ar: 'غرام', en: 'grams' },
+};
+
+export const CATEGORY_NAMES = {
+  dish: { ku: 'خوارنێن ماڵێ', ar: 'أكلات بيتية', en: 'Home dishes' },
+  stew: { ku: 'مەرەق و شۆربا', ar: 'مرق وشوربة', en: 'Stews & soups' },
+  rice: { ku: 'برنج و سەوار', ar: 'تمن وبرغل', en: 'Rice & grains' },
+  grill: { ku: 'کەباب و برژاندی', ar: 'مشويات', en: 'Grills' },
+  bread: { ku: 'نان', ar: 'خبز', en: 'Bread' },
+  breakfast: { ku: 'تێشت', ar: 'فطور', en: 'Breakfast' },
+  dairy: { ku: 'شیر و ماست', ar: 'ألبان', en: 'Dairy' },
+  fast: { ku: 'خوارنا خێرا', ar: 'وجبات سريعة', en: 'Fast food' },
+  sweet: { ku: 'شرینی', ar: 'حلويات', en: 'Sweets' },
+  snack: { ku: 'کەرەزات و سڤکاهی', ar: 'كرزات', en: 'Nuts & snacks' },
+  drink: { ku: 'ڤەخوارن', ar: 'مشروبات', en: 'Drinks' },
+  fruit: { ku: 'مێوە', ar: 'فواكه', en: 'Fruits' },
+  veg: { ku: 'سەوزە', ar: 'خضروات', en: 'Vegetables' },
+  protein: { ku: 'گۆشت و دانەوێڵە', ar: 'لحوم وبقوليات', en: 'Meat & legumes' },
+  extra: { ku: 'ڕۆن و سۆس', ar: 'زيوت وصلصات', en: 'Oils & sauces' },
+  custom: { ku: 'خوارنێن من', ar: 'أطعمتي', en: 'My foods' },
+};
+
+// Week starts Saturday.
+export const DAY_SHORT = {
+  ku: ['شەم', 'یەک', 'دوو', 'سێ', 'چار', 'پێنج', 'ئەینی'],
+  ar: ['سبت', 'أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة'],
+  en: ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+};
+export const DAY_LONG = {
+  ku: ['شەمبی', 'یەکشەمبی', 'دووشەمبی', 'سێشەمبی', 'چارشەمبی', 'پێنجشەمبی', 'ئەینی'],
+  ar: ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'],
+  en: ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+};
+export const MONTHS = {
+  ku: ['کانوونا دووێ', 'شوبات', 'ئادار', 'نیسان', 'گولان', 'حوزەیران', 'تیرمەه', 'تەباخ', 'ئەیلوول', 'چریا ئێکێ', 'چریا دووێ', 'کانوونا ئێکێ'],
+  ar: ['كانون الثاني', 'شباط', 'آذار', 'نيسان', 'أيار', 'حزيران', 'تموز', 'آب', 'أيلول', 'تشرين الأول', 'تشرين الثاني', 'كانون الأول'],
+  en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+};
+
+export const LANG_LABELS = { ku: 'کوردی (بادینی)', ar: 'العربية', en: 'English' };
+
+export const isRtl = (lang) => lang !== 'en';
+
+/** Translator for one language. Missing keys show the key itself so they are easy to spot. */
+export function makeT(lang) {
+  const i = LANG_INDEX[lang] ?? 0;
+  return (key, vars) => {
+    const text = S[key]?.[i] ?? key;
+    return vars ? text.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? '')) : text;
+  };
+}
+
+export const STRING_KEYS = Object.keys(S);
+export const STRINGS = S;
