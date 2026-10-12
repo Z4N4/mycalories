@@ -4,8 +4,8 @@
 export default [
   // ---------- Breads ----------
   ['bread', 'samoon', 'Samoon', 'صمون', 'سەموون', 270, 9, 54, 1.5, 'piece:80', 'samun bread nan'],
-  ['bread', 'khubz_tannour', 'Tannour bread (Iraqi flatbread)', 'خبز تنور', 'نانێ تەنووری', 270, 9, 55, 1.2, 'piece:120', 'khubz nan bread'],
-  ['bread', 'nan_saj', 'Saj bread (thin Kurdish bread)', 'خبز صاج', 'نانێ ساجێ', 280, 9, 57, 1.5, 'piece:60', 'lavash nan tiri bread'],
+  ['bread', 'khubz_tannour', 'Tannour bread (Iraqi flatbread)', 'خبز تنور', 'نانێ تەنووری', 270, 9, 55, 1.2, 'piece:120', 'khubz nan tenure tanoor bread نانێ تەنوورێ'],
+  ['bread', 'nan_saj', 'Saj bread (thin Kurdish bread)', 'خبز صاج', 'نانێ ساجێ', 280, 9, 57, 1.5, 'piece:60', 'lavash nan tiri nane tiri selik bread نانێ تیری سێلک'],
   ['bread', 'pita', 'Arabic pita bread', 'خبز عربي', 'نانێ عەرەبی', 275, 9, 55, 1.2, 'piece:70', 'khubz bread'],
   ['bread', 'toast', 'Toast bread', 'خبز توست', 'نانێ تۆست', 265, 9, 49, 3.2, 'slice:28', 'bread'],
   ['bread', 'kaak', 'Iraqi sesame kaak', 'كعك', 'کەعک', 420, 10, 66, 13, 'piece:25', 'kahk biscuit'],
@@ -16,7 +16,7 @@ export default [
   // ---------- Breakfast ----------
   ['breakfast', 'kahi', 'Kahi (layered pastry)', 'كاهي', 'کاهی', 380, 6, 45, 20, 'piece:120', 'kahi geymar'],
   ['breakfast', 'geymar', 'Geymar (clotted cream)', 'قيمر', 'قەیماغ', 380, 2.5, 3, 40, 'tbsp:20 serving:50', 'gaimar qaimar qeymer'],
-  ['breakfast', 'dibis', 'Date syrup (dibis)', 'دبس', 'دۆشاو', 290, 1.5, 72, 0.2, 'tbsp:20 tsp:7', 'dibs dates syrup'],
+  ['breakfast', 'dibis', 'Date syrup (dibis)', 'دبس', 'دۆشاو', 290, 1.5, 72, 0.2, 'tbsp:20 tsp:7', 'dibs dims dates syrup دمس دیمس'],
   ['breakfast', 'tahini', 'Tahini (rashi)', 'راشي / طحينة', 'ڕاشی', 595, 17, 21, 54, 'tbsp:15', 'tahina rashi'],
   ['breakfast', 'honey', 'Honey', 'عسل', 'هنگڤین', 304, 0.3, 82, 0, 'tbsp:21 tsp:7', 'asal'],
   ['breakfast', 'jam', 'Jam', 'مربى', 'مرەبا', 250, 0.4, 62, 0.1, 'tbsp:20 tsp:7', 'murabba'],

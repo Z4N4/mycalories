@@ -62,14 +62,21 @@ test('customToFood converts per-serving values to per 100 g', () => {
 });
 
 test('buildFoods applies overrides and lists custom foods first', () => {
-  let state = setOverride(createInitialState(), 'dolma', { kcal: 999, p: 1, c: 1, f: 1 });
+  let state = setOverride(createInitialState(), 'samoon', { kcal: 999, p: 1, c: 1, f: 1 });
   state = saveCustomFood(state, { name: 'Mine', kcal: 100, p: 1, c: 1, f: 1, servingG: 0 });
   const foods = buildFoods(state);
   assert.equal(foods[0].name, 'Mine');
-  const dolma = foods.find((f) => f.id === 'dolma');
-  assert.equal(dolma.per100.kcal, 999);
-  assert.equal(dolma.edited, true);
-  assert.equal(BUILT_IN.find((f) => f.id === 'dolma').per100.kcal, 160);
+  const samoon = foods.find((f) => f.id === 'samoon');
+  assert.equal(samoon.per100.kcal, 999);
+  assert.equal(samoon.edited, true);
+  assert.equal(BUILT_IN.find((f) => f.id === 'samoon').per100.kcal, 270);
+});
+
+test('number overrides are ignored for dishes that are calculated from ingredients', () => {
+  const state = setOverride(createInitialState(), 'dolma', { kcal: 999, p: 1, c: 1, f: 1 });
+  const dolma = buildFoods(state).find((f) => f.id === 'dolma');
+  assert.notEqual(dolma.per100.kcal, 999);
+  assert.ok(dolma.recipe);
 });
 
 test('foodName and entryName fall back sensibly', () => {

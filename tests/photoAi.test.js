@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildPrompt, parseAiResult, isPlausibleKey } from '../js/core/photoAi.js';
+import { buildPrompt, parseAiResult, isPlausibleKey, cleanKey } from '../js/core/photoAi.js';
 import { BUILT_IN } from '../js/foods/index.js';
 
 const byId = new Map(BUILT_IN.map((f) => [f.id, f]));
@@ -47,8 +47,13 @@ test('parseAiResult throws on text that is not JSON', () => {
   assert.throws(() => parseAiResult('sorry, I cannot', byId));
 });
 
-test('isPlausibleKey accepts key-shaped strings only', () => {
+test('isPlausibleKey accepts old and new Google key formats', () => {
   assert.equal(isPlausibleKey('AIzaSyA1234567890abcdefghijklmnopqrstu'), true);
+  assert.equal(isPlausibleKey('AQ.Ab8RN6Lx_example-auth.key/with+chars=1234567890'), true);
   assert.equal(isPlausibleKey('short'), false);
-  assert.equal(isPlausibleKey('has spaces in it and is long enough'), false);
+  assert.equal(isPlausibleKey('كلمة عربية طويلة جداً جداً جداً'), false);
+});
+
+test('cleanKey strips spaces, line breaks, quotes and invisible marks from a paste', () => {
+  assert.equal(cleanKey(' "AIza Sy\nA123" ​'), 'AIzaSyA123');
 });

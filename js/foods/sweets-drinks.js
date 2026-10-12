@@ -58,5 +58,5 @@ export default [
   ['drink', 'cola', 'Cola (Pepsi / Coca-Cola)', 'پيبسي / كولا', 'پیپسی / کۆلا', 42, 0, 10.6, 0, 'can:330 bottle:500 glass:250', 'pepsi coca soda'],
   ['drink', 'cola_diet', 'Diet cola', 'كولا دايت', 'کۆلا دایت', 0.4, 0, 0, 0, 'can:330 bottle:500', 'pepsi zero soda'],
   ['drink', 'soda_lemon', '7Up / Sprite', 'سفن اب', 'سێڤن ئەپ', 40, 0, 10, 0, 'can:330 bottle:500', 'soda'],
-  ['drink', 'energy', 'Energy drink', 'مشروب طاقة', 'خوارنا وزەیێ', 45, 0, 11, 0, 'can:250', 'red bull'],
+  ['drink', 'energy', 'Energy drink', 'مشروب طاقة', 'ڤەخوارنا وزەیێ', 45, 0, 11, 0, 'can:250', 'energy drink'],
 ];

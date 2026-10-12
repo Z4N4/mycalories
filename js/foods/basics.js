@@ -19,7 +19,7 @@ export default [
   ['fast', 'pizza_cheese', 'Cheese pizza', 'بيتزا جبن', 'پیتزا ب پەنیری', 265, 11, 33, 10, 'slice:107', 'pizza'],
   ['fast', 'pizza_meat', 'Meat / pepperoni pizza', 'بيتزا لحم', 'پیتزا ب گۆشتی', 290, 12, 32, 13, 'slice:110', 'pizza'],
   ['fast', 'hot_dog', 'Hot dog', 'هوت دوك', 'هۆت دۆگ', 250, 10, 25, 13, 'piece:100', 'sausage'],
-  ['fast', 'lahm_ajeen', 'Lahm bi ajeen', 'لحم بعجين', 'لەحم ب عەجین', 280, 11, 33, 12, 'piece:80', 'lahmacun'],
+  ['fast', 'lahm_ajeen', 'Lahm bi ajeen', 'لحم بعجين', 'لەحم ب عەجین', 280, 11, 33, 12, 'piece:80', 'lahmacun lahmajun'],
 
   // ---------- Fruits ----------
   ['fruit', 'apple', 'Apple', 'تفاح', 'سێڤ', 52, 0.3, 14, 0.2, 'medium:180', 'tuffah siv'],
@@ -80,6 +80,20 @@ export default [
   ['protein', 'chickpeas', 'Chickpeas, cooked', 'حمص مسلوق', 'نۆک', 164, 9, 27, 2.6, 'cup:160', 'nok'],
   ['protein', 'white_beans', 'White beans, cooked', 'فاصوليا مسلوقة', 'فاسۆلیا', 140, 9.7, 25, 0.4, 'cup:180', 'fasolia'],
   ['protein', 'fava', 'Fava beans, cooked (bagilla)', 'باقلاء مسلوقة', 'باقلە', 110, 7.6, 19.6, 0.4, 'cup:170 bowl:250', 'bagilla baqilla'],
+
+  // ---------- Ingredients (used by recipes too) ----------
+  ['rice', 'bulgur_plain', 'Bulgur, cooked (plain)', 'برغل مسلوق', 'سەوارێ کەلاندی', 83, 3.1, 18.6, 0.2, 'cup:180 plate:300', 'burghul savar'],
+  ['veg', 'okra', 'Okra, cooked', 'بامية مطبوخة', 'بامیە', 33, 1.9, 7, 0.2, 'cup:160', 'bamya'],
+  ['veg', 'peas', 'Green peas, cooked', 'بزاليا', 'پەزالیا', 81, 5.4, 14, 0.4, 'cup:160', 'bazalia'],
+  ['veg', 'green_beans', 'Green beans, cooked', 'فاصوليا خضراء', 'فاسۆلیا کەسک', 31, 1.8, 7, 0.2, 'cup:125', 'fasolia'],
+  ['veg', 'eggplant', 'Eggplant, grilled (no oil)', 'باذنجان مشوي', 'باجانێ ڕەش یێ برژاندی', 25, 1, 6, 0.2, 'medium:250', 'baytinjan'],
+  ['veg', 'cauliflower', 'Cauliflower, boiled', 'قرنابيط مسلوق', 'قەرنابیت', 25, 1.9, 5, 0.3, 'cup:125', 'qarnabeet'],
+  ['veg', 'grape_leaves', 'Grape leaves, cooked', 'ورق عنب', 'بەلگێن ترییێ', 93, 5.6, 17, 2.1, 'piece:3', 'warak enab'],
+  ['veg', 'garlic', 'Garlic', 'ثوم', 'سیر', 149, 6.4, 33, 0.5, 'piece:4', 'thoom sir'],
+  ['extra', 'tomato_paste', 'Tomato paste', 'معجون طماطة', 'ڕبێ باجانێن سۆر', 82, 4.3, 16, 0.5, 'tbsp:16', 'salsa paste'],
+  ['extra', 'flour', 'White flour', 'طحين', 'ئارد', 364, 10, 76, 1, 'cup:125 tbsp:8', 'tahin ard'],
+  ['extra', 'sugar_syrup', 'Sugar syrup (sheera)', 'شيرة', 'شیرە', 260, 0, 65, 0, 'tbsp:20', 'sheera'],
+  ['extra', 'lemon_juice', 'Lemon juice', 'عصير ليمون', 'ئاڤا لیمۆیێ', 22, 0.4, 7, 0.2, 'tbsp:15', 'lemon'],
 
   // ---------- Oils & sauces ----------
   ['extra', 'olive_oil', 'Olive oil', 'زيت زيتون', 'ڕۆنێ زەیتوونێ', 884, 0, 0, 100, 'tbsp:13.5 tsp:4.5', 'zeit'],

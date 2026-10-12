@@ -5,13 +5,16 @@ It runs as a web app that you add to your iPhone Home Screen. Once installed, it
 
 ## Features
 
-- **232 foods**: dolma, yaprakh, kubba (Halab, Mosul, burghul, kutilk), biryani, quzi, tashreeb, pacha, maqluba, all the marga stews, timman, savar, kebab/tikka/shifta, samoon, kahi & geymar, kleicha, baklawa, chai, laban, shawarma, falafel, fruits, vegetables and more
+- **391 foods**: dolma (5 kinds), yaprakh, kubba (Halab, Mosul, burghul, kutilk, siniya, hamuth, shalgham), biryani, quzi, tashreeb, pacha, maqluba, every marga stew, timman, savar, girar, tirshik, mehîr, qelî, kada, kulêre, kebab/tikka/shifta, Duhok street food (kebab wraps, döner, iskender, kumpir, pide, gözleme), sweets (kleicha, baklawa, burma, sohan, ma'amoul), drinks, fruits, vegetables
+- **Market products** (76): Turkish (Ülker, Eti, Torku), Iranian (Maz Maz, Pofak, Minoo, Kalleh), international (Lay's, Pringles, Red Bull, Monster, Snickers, Kinder, Nutella…) and local products
+- **Food templates**: about 110 dishes are built from ingredients (rice, meat, oil, bread, sauces…). Open a dish → *View & edit ingredients* to change each one, so *your* shawarma has *your* calories
+- **Meal planner**: a full day of meals that fits your calorie goal (simple or traditional food), with *Swap* and *Add to diary*
 - **Local portions**: plate, half plate, piece, samoon, istikan, skewer, sandwich, cup, tablespoon… or exact **grams**
 - **Search in any language**: `dolma`, `دولمة` and `دۆلمە` all find the same dish
 - **Daily goal**: calculated from sex, age, height, weight, activity and goal (lose / keep / gain), or your own number
 - **Protein / carbs / fat** for every food and every day
 - **Meals**: breakfast, lunch, dinner, snacks, with **copy from yesterday** and **Undo**
-- **Week view** (Saturday → Friday): bar chart, weekly total vs weekly goal, daily average
+- **Stats**: week view (Saturday → Friday): bar chart, weekly total vs weekly goal, daily average
 - **Month view**: calendar with every day colored green (within goal) or orange (over)
 - **Weight tracking** with a chart
 - **Barcode scanning**: live camera, typed number, or a photo of the barcode. Products come from the free

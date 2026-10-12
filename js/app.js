@@ -9,15 +9,15 @@ import { h, replaceChildren, toast } from './ui/dom.js';
 import { icon } from './ui/icons.js';
 import { renderOnboarding } from './views/onboarding.js';
 import { renderToday } from './views/today.js';
-import { renderWeek } from './views/week.js';
-import { renderMonth } from './views/month.js';
+import { renderPlan } from './views/plan.js';
+import { renderStats } from './views/stats.js';
 import { renderWeight } from './views/weight.js';
 import { renderSettings } from './views/settings.js';
 
 const TABS = [
   { id: 'today', icon: 'today', label: 'tabToday', render: renderToday },
-  { id: 'week', icon: 'week', label: 'tabWeek', render: renderWeek },
-  { id: 'month', icon: 'month', label: 'tabMonth', render: renderMonth },
+  { id: 'plan', icon: 'plan', label: 'tabPlan', render: renderPlan },
+  { id: 'stats', icon: 'stats', label: 'tabStats', render: renderStats },
   { id: 'weight', icon: 'weight', label: 'tabWeight', render: renderWeight },
   { id: 'settings', icon: 'settings', label: 'tabSettings', render: renderSettings },
 ];

@@ -5,11 +5,22 @@ import dishes from './dishes.js';
 import breakfast from './breakfast.js';
 import sweetsDrinks from './sweets-drinks.js';
 import basics from './basics.js';
+import duhok from './duhok.js';
+import market from './market.js';
+import RECIPES from './recipes.js';
+import { parseRecipe, applyRecipe } from '../core/recipes.js';
 
 export const CATEGORIES = [
   'dish', 'stew', 'rice', 'grill', 'bread', 'breakfast', 'dairy',
-  'fast', 'sweet', 'snack', 'drink', 'fruit', 'veg', 'protein', 'extra',
+  'fast', 'market', 'sweet', 'snack', 'drink', 'fruit', 'veg', 'protein', 'extra',
 ];
+
+const DEFAULT_RECIPES = Object.fromEntries(
+  Object.entries(RECIPES).map(([id, [unit, spec]]) => [id, { unit, items: parseRecipe(spec) }]),
+);
+
+export const hasRecipe = (foodId) => Boolean(DEFAULT_RECIPES[foodId]);
+export const defaultRecipe = (foodId) => DEFAULT_RECIPES[foodId];
 
 function parsePortions(spec) {
   const portions = spec.split(' ').map((part) => {
@@ -29,7 +40,7 @@ export function rowToFood([cat, id, en, ar, ku, kcal, p, c, f, portions, keys]) 
   };
 }
 
-export const BUILT_IN = [...dishes, ...breakfast, ...sweetsDrinks, ...basics].map(rowToFood);
+export const BUILT_IN = [...dishes, ...duhok, ...breakfast, ...sweetsDrinks, ...basics, ...market].map(rowToFood);
 
 /** A user-made food: values are entered per serving, stored that way, converted here. */
 export function customToFood(c) {
@@ -44,12 +55,25 @@ export function customToFood(c) {
   };
 }
 
+/**
+ * All foods as the user sees them: their own foods first, then built-in foods
+ * with their edited numbers, and dishes calculated from (their own or the
+ * default) ingredients. Ingredients are always plain foods, never other dishes.
+ */
 export function buildFoods(state) {
-  const builtIn = BUILT_IN.map((food) => {
-    const own = state.overrides[food.id];
+  const custom = state.customFoods.map(customToFood);
+  const plain = BUILT_IN.map((food) => {
+    const own = !hasRecipe(food.id) && state.overrides[food.id];
     return own ? { ...food, per100: { ...own }, edited: true } : food;
   });
-  return [...state.customFoods.map(customToFood), ...builtIn];
+  const ingredients = new Map([...plain, ...custom].map((f) => [f.id, f]));
+  const builtIn = plain.map((food) => {
+    const recipe = DEFAULT_RECIPES[food.id];
+    if (!recipe) return food;
+    const own = state.recipes?.[food.id];
+    return applyRecipe(food, recipe.unit, own ?? recipe.items, ingredients, Boolean(own));
+  });
+  return [...custom, ...builtIn];
 }
 
 export function foodName(food, lang) {

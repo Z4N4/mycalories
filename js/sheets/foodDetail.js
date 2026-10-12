@@ -12,6 +12,7 @@ import { foodName } from '../foods/index.js';
 import { CATEGORY_NAMES, MEAL_NAMES } from '../i18n/strings.js';
 import { overrideEditor } from './overrideEditor.js';
 import { openCustomFood } from './customFood.js';
+import { openRecipeEditor } from './recipeEditor.js';
 
 const QUICK_QTY = [0.5, 1, 1.5, 2, 3];
 const QUICK_GRAMS = [50, 100, 150, 200, 300];
@@ -135,6 +136,8 @@ export function openFoodDetail(app, { food: startFood, dateKey, meal: startMeal,
       return;
     }
     food = fresh;
+    renderEditControl();
+    renderMeta();
     renderUnits();
     renderPreview();
     onChange?.();
@@ -150,16 +153,33 @@ export function openFoodDetail(app, { food: startFood, dateKey, meal: startMeal,
     },
   }, icon('trash'), t('delete'));
 
-  let editLink;
-  if (food.adhoc) editLink = '';
-  else editLink = food.custom
-    ? h('button', { class: 'link-btn', onClick: () => openCustomFood(app, app.state.customFoods.find((c) => c.id === food.id), onFoodValuesChanged) }, icon('edit'), t('edit'))
-    : overrideEditor(app, food, onFoodValuesChanged);
+  // How this food's numbers can be changed: ingredients for dishes, the custom
+  // food form for "My foods", or the per-100 g editor for plain foods.
+  const editSlot = h('div');
+  function renderEditControl() {
+    if (food.adhoc) { editSlot.replaceChildren(); return; }
+    if (food.recipe) {
+      const names = food.recipe.items.slice(0, 6).map((i) => foodName(app.d.foodsById.get(i.id), lang)).join(lang === 'en' ? ', ' : '، ');
+      editSlot.replaceChildren(h('button', { class: 'ing-card', onClick: () => openRecipeEditor(app, food, onFoodValuesChanged) },
+        h('span', { class: 'ing-card-title' }, icon('list'), t('editIngredients'),
+          food.edited ? h('span', { class: 'badge' }, t('myRecipe')) : ''),
+        h('span', { class: 'muted small' }, `${names}${food.recipe.items.length > 6 ? '…' : ''}`)));
+      return;
+    }
+    editSlot.replaceChildren(food.custom
+      ? h('button', { class: 'link-btn', onClick: () => openCustomFood(app, app.state.customFoods.find((c) => c.id === food.id), onFoodValuesChanged) }, icon('edit'), t('edit'))
+      : overrideEditor(app, food, onFoodValuesChanged));
+  }
+  renderEditControl();
+  const editLink = editSlot;
 
+  const metaEl = h('div', { class: 'detail-meta muted' });
+  const renderMeta = () => metaEl.replaceChildren(
+    food.adhoc ? '' : (CATEGORY_NAMES[food.cat]?.[lang] ?? ''),
+    food.edited ? h('span', { class: 'badge' }, t('editedBadge')) : '');
+  renderMeta();
   const body = h('div', { class: 'stack detail' },
-    h('div', { class: 'detail-meta muted' },
-      food.adhoc ? '' : (CATEGORY_NAMES[food.cat]?.[lang] ?? ''),
-      food.edited ? h('span', { class: 'badge' }, t('editedBadge')) : ''),
+    metaEl,
     h('div', { class: 'field' }, h('span', { class: 'field-label' }, t('portion')), unitsEl),
     h('div', { class: 'field' },
       h('span', { class: 'field-label' }, t('quantity')),

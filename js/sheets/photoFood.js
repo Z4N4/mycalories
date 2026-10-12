@@ -11,6 +11,7 @@ import { foodName } from '../foods/index.js';
 import { MEAL_NAMES } from '../i18n/strings.js';
 import { analyzePhoto, getKey, AiError } from '../services/gemini.js';
 import { shrinkImage } from '../services/image.js';
+import { openCamera } from '../ui/camera.js';
 
 const GRAM_STEP = 10;
 const ERROR_TEXT = { noKey: 'aiNoKey', badKey: 'aiBadKey', quota: 'aiQuota', offline: 'offline', failed: 'aiFailed' };
@@ -69,21 +70,22 @@ export function openPhotoFood(app, { dateKey, meal: startMeal, onChange }) {
   let meal = startMeal;
   let items = [];
 
-  const fileInput = h('input', { type: 'file', accept: 'image/*', class: 'hidden' });
-  const pickBtn = () => h('button', { class: 'btn primary big', onClick: () => fileInput.click() }, icon('camera'), t('takePhoto'));
+  const camera = () => openCamera({ t, onPhoto: handlePhoto });
+  const pickBtn = () => h('button', { class: 'btn primary big', onClick: camera }, icon('camera'), t('tryAgain'));
 
   function startView() {
     return h('div', { class: 'stack' },
-      h('div', { class: 'photo-drop', onClick: () => fileInput.click() }, icon('camera'), h('span', null, t('takePhoto'))),
+      h('button', { class: 'photo-drop', onClick: camera }, icon('camera'), h('span', null, t('openCamera'))),
       h('p', { class: 'note' }, icon('info'), t('photoHint')),
       h('p', { class: 'note' }, icon('info'), t('aiPrivacy')));
   }
 
-  function errorView(code, preview) {
+  function errorView(code, preview, detail = '') {
     sheet.setFooter(null);
     return h('div', { class: 'stack' },
       preview,
       h('p', { class: 'field-error center' }, t(ERROR_TEXT[code] ?? 'aiFailed')),
+      detail ? h('p', { class: 'muted small detail-text', dir: 'ltr' }, `Google: ${detail}`) : '',
       code === 'badKey' || code === 'noKey'
         ? h('button', { class: 'btn', onClick: () => { closeAllSheets(); app.go('settings'); } }, t('openSettings'))
         : pickBtn());
@@ -131,14 +133,11 @@ export function openPhotoFood(app, { dateKey, meal: startMeal, onChange }) {
     return h('div', { class: 'stack' }, preview, h('p', { class: 'center muted' }, t('noFoodFound')), pickBtn());
   }
 
-  fileInput.addEventListener('change', async () => {
-    const file = fileInput.files?.[0];
-    fileInput.value = '';
-    if (!file) return;
+  async function handlePhoto(photo) {
     sheet.setFooter(null);
     let image;
     try {
-      image = await shrinkImage(file);
+      image = await shrinkImage(photo);
     } catch {
       sheet.setBody(errorView('failed', h('p', { class: 'field-error center' }, t('imageUnreadable'))));
       return;
@@ -150,9 +149,10 @@ export function openPhotoFood(app, { dateKey, meal: startMeal, onChange }) {
       items = found.map((i) => ({ ...i, on: true }));
       sheet.setBody(resultsView(preview));
     } catch (err) {
-      sheet.setBody(errorView(err instanceof AiError ? err.code : 'failed', preview));
+      const aiErr = err instanceof AiError ? err : null;
+      sheet.setBody(errorView(aiErr?.code ?? 'failed', preview, aiErr?.detail ?? ''));
     }
-  });
+  }
 
   const sheet = openSheet({
     title: t('photoTitle'),
@@ -160,5 +160,5 @@ export function openPhotoFood(app, { dateKey, meal: startMeal, onChange }) {
     tall: true,
     body: getKey() ? startView() : noKeyBody(app, t),
   });
-  sheet.panel.append(fileInput);
+  if (getKey()) camera(); // go straight to the camera
 }

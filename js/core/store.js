@@ -2,6 +2,7 @@
 // and never modifies the one passed in.
 
 import { isValidKey } from './dates.js';
+import { cleanRecipeItems } from './recipes.js';
 
 export const VERSION = 1;
 export const MEALS = ['breakfast', 'lunch', 'dinner', 'snacks'];
@@ -11,7 +12,7 @@ export const MAX_RECENT = 30;
 export function createInitialState() {
   return {
     version: VERSION,
-    settings: { lang: 'ku', onboarded: false },
+    settings: { lang: 'ku', onboarded: false, planStyle: 'traditional' },
     profile: {
       sex: 'male', age: 25, heightCm: 175, weightKg: 75,
       activity: 'light', goal: 'keep', customGoal: null,
@@ -19,6 +20,8 @@ export function createInitialState() {
     log: {},
     customFoods: [],
     overrides: {},
+    recipes: {},
+    planSwaps: {},
     favorites: [],
     recent: [],
     weights: {},
@@ -114,6 +117,26 @@ export function setProfile(state, changes) {
   return { ...state, profile: { ...state.profile, ...changes } };
 }
 
+/** The user's own ingredient list for a dish (replaces the default recipe). */
+export function setRecipe(state, foodId, items) {
+  return { ...state, recipes: { ...state.recipes, [foodId]: items.map((i) => ({ id: i.id, g: i.g })) } };
+}
+
+export function clearRecipe(state, foodId) {
+  const { [foodId]: _old, ...rest } = state.recipes;
+  return { ...state, recipes: rest };
+}
+
+const MAX_PLAN_DAYS = 31;
+
+/** Remember which suggestion of a meal is shown on a planned day ('swap'). */
+export function swapPlanMeal(state, dateKey, meal) {
+  const day = state.planSwaps[dateKey] ?? {};
+  const days = { ...state.planSwaps, [dateKey]: { ...day, [meal]: (day[meal] ?? 0) + 1 } };
+  const recent = Object.keys(days).sort().slice(-MAX_PLAN_DAYS);
+  return { ...state, planSwaps: Object.fromEntries(recent.map((k) => [k, days[k]])) };
+}
+
 export function setSettings(state, changes) {
   return { ...state, settings: { ...state.settings, ...changes } };
 }
@@ -191,16 +214,28 @@ export function parseBackup(text) {
   const weights = isObj(raw.weights)
     ? Object.fromEntries(Object.entries(raw.weights).filter(([k, v]) => isValidKey(k) && inRange(v, 25, 350)))
     : {};
+  const recipes = isObj(raw.recipes)
+    ? Object.fromEntries(Object.entries(raw.recipes).map(([k, v]) => [k, cleanRecipeItems(v)]).filter(([, v]) => v))
+    : {};
+  const planStyle = raw.settings?.planStyle === 'simple' ? 'simple' : 'traditional';
+  const planSwaps = isObj(raw.planSwaps)
+    ? Object.fromEntries(Object.entries(raw.planSwaps)
+      .filter(([k, v]) => isValidKey(k) && isObj(v))
+      .map(([k, v]) => [k, Object.fromEntries(Object.entries(v)
+        .filter(([meal, n]) => MEALS.includes(meal) && Number.isInteger(n) && n >= 0 && n < 1000))]))
+    : {};
   const overrides = isObj(raw.overrides)
     ? Object.fromEntries(Object.entries(raw.overrides).filter(([, v]) => isObj(v) && [v.kcal, v.p, v.c, v.f].every(isNum)))
     : {};
   return {
     ...base,
-    settings: { lang, onboarded: true },
+    settings: { lang, onboarded: true, planStyle },
     profile: cleanProfile(raw.profile, base.profile),
     log: cleanLog(raw.log),
     customFoods: Array.isArray(raw.customFoods) ? raw.customFoods.map(cleanCustomFood).filter(Boolean) : [],
     overrides,
+    recipes,
+    planSwaps,
     favorites: cleanIds(raw.favorites),
     recent: cleanIds(raw.recent).slice(0, MAX_RECENT),
     weights,

@@ -81,7 +81,16 @@ export function parseAiResult(text, foodsById) {
   return items.map((raw) => toItem(raw, foodsById)).filter(Boolean).slice(0, MAX_ITEMS);
 }
 
-/** Rough shape check so obvious typos are caught before calling Google. */
+/** Removes spaces, line breaks and quotes that sneak in when pasting on a phone. */
+export function cleanKey(key) {
+  return String(key ?? '').replace(/[\s"'`​-‏⁦-⁩]/g, '');
+}
+
+/**
+ * Loose length check only: Google has more than one key format (old "AIza…"
+ * keys and newer auth keys), so the real check is a request to Google.
+ */
 export function isPlausibleKey(key) {
-  return /^[A-Za-z0-9_-]{30,100}$/.test(String(key ?? '').trim());
+  const clean = cleanKey(key);
+  return clean.length >= 20 && clean.length <= 400 && /^[\x21-\x7E]+$/.test(clean);
 }

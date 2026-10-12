@@ -13,30 +13,32 @@ export function aiSection(app) {
   const hasKey = Boolean(getKey());
   const input = h('input', {
     class: 'input', type: 'password', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false',
-    placeholder: 'AIza…', 'aria-label': t('aiKey'),
+    placeholder: t('aiKeyPlaceholder'), 'aria-label': t('aiKey'),
   });
   const errorSlot = h('div');
   const saveBtn = h('button', { class: 'btn primary' }, t('save'));
 
+  // Shows our message plus Google's own reason, so a problem can be diagnosed.
+  const showError = (message, detail) => errorSlot.replaceChildren(
+    fieldError(message),
+    detail ? h('p', { class: 'muted small detail-text', dir: 'ltr' }, `Google: ${detail}`) : '',
+  );
+
   saveBtn.addEventListener('click', async () => {
-    const key = input.value.trim();
+    const key = input.value;
     if (!isPlausibleKey(key)) {
-      errorSlot.replaceChildren(fieldError(t('aiKeyInvalid')));
+      showError(t('aiKeyTooShort'));
       return;
     }
     saveBtn.disabled = true;
-    const result = await testKey(key);
+    errorSlot.replaceChildren(h('p', { class: 'muted small' }, t('aiKeyChecking')));
+    const { status, detail, mode } = await testKey(key);
     saveBtn.disabled = false;
-    if (result === 'badKey') {
-      errorSlot.replaceChildren(fieldError(t('aiKeyInvalid')));
-      return;
-    }
-    if (result === 'offline') {
-      errorSlot.replaceChildren(fieldError(t('offline')));
-      return;
-    }
-    setKey(key);
-    app.commit(app.state, t('aiKeySaved'));
+    if (status === 'offline') { showError(t('offline')); return; }
+    if (status === 'badKey') { showError(t('aiKeyInvalid'), detail); return; }
+    if (status === 'failed') { showError(t('aiKeyFailed'), detail); return; }
+    setKey(key, mode);
+    app.commit(app.state, status === 'quota' ? t('aiKeySavedQuota') : t('aiKeySaved'));
   });
 
   const remove = () => {
