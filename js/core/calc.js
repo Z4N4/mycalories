@@ -10,9 +10,36 @@ export const ACTIVITY = {
 
 export const GOAL_DELTA = { lose: -500, keep: 0, gain: 300 };
 
+/** Deficit / surplus sizes the user can pick (kcal per day). */
+export const DEFICIT_OPTIONS = [-250, -500, -750, -1000];
+export const SURPLUS_OPTIONS = [250, 300, 500];
+
+/** Protein / carbs / fat as % of calories. */
+export const DEFAULT_SPLIT = { p: 25, c: 45, f: 30 };
+export const MACRO_PRESETS = {
+  balanced: { p: 25, c: 45, f: 30 },
+  highProtein: { p: 35, c: 35, f: 30 },
+  lowCarb: { p: 30, c: 20, f: 50 },
+};
+const MIN_SHARE = 5;
+const MAX_SHARE = 80;
+const KCAL_PER_KG_FAT = 7700;
+
 const MIN_KCAL = { male: 1500, female: 1200 };
-const MACRO_SPLIT = { p: 0.25, c: 0.45, f: 0.3 };
 const KCAL_PER_GRAM = { p: 4, c: 4, f: 9 };
+
+/** Whole percentages, each 5–80, adding up to exactly 100. */
+export function isValidSplit(split) {
+  if (!split || typeof split !== 'object') return false;
+  const parts = [split.p, split.c, split.f];
+  return parts.every((v) => Number.isInteger(v) && v >= MIN_SHARE && v <= MAX_SHARE)
+    && parts.reduce((a, b) => a + b, 0) === 100;
+}
+
+/** Expected weight change per week for a daily kcal difference (rounded to 0.01 kg). */
+export function kgPerWeek(dailyChange) {
+  return Math.round(((dailyChange * 7) / KCAL_PER_KG_FAT) * 100) / 100;
+}
 
 const round1 = (n) => Math.round(n * 10) / 10;
 
@@ -27,19 +54,28 @@ export function tdee(profile) {
 }
 
 /** Daily kcal target: the user's own number, or calculated from the profile. */
+/** Daily kcal change for the goal: the user's chosen size, or the default for that goal. */
+export function goalChange(profile) {
+  if (profile.goal === 'keep') return 0;
+  const own = profile.goalChange;
+  const ok = Number.isFinite(own) && (profile.goal === 'lose' ? own < 0 : own > 0);
+  return ok ? own : (GOAL_DELTA[profile.goal] ?? 0);
+}
+
 export function dailyGoal(profile) {
   if (Number.isFinite(profile.customGoal) && profile.customGoal > 0) return Math.round(profile.customGoal);
-  const raw = tdee(profile) + (GOAL_DELTA[profile.goal] ?? 0);
+  const raw = tdee(profile) + goalChange(profile);
   const min = MIN_KCAL[profile.sex] ?? MIN_KCAL.female;
   return Math.max(min, Math.round(raw / 10) * 10);
 }
 
-/** Grams of protein / carbs / fat for a kcal target. */
-export function macroTargets(kcal) {
+/** Grams of protein / carbs / fat for a kcal target and a % split (default 25/45/30). */
+export function macroTargets(kcal, split) {
+  const s = isValidSplit(split) ? split : DEFAULT_SPLIT;
   return {
-    p: Math.round((kcal * MACRO_SPLIT.p) / KCAL_PER_GRAM.p),
-    c: Math.round((kcal * MACRO_SPLIT.c) / KCAL_PER_GRAM.c),
-    f: Math.round((kcal * MACRO_SPLIT.f) / KCAL_PER_GRAM.f),
+    p: Math.round((kcal * s.p) / 100 / KCAL_PER_GRAM.p),
+    c: Math.round((kcal * s.c) / 100 / KCAL_PER_GRAM.c),
+    f: Math.round((kcal * s.f) / 100 / KCAL_PER_GRAM.f),
   };
 }
 

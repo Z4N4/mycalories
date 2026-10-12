@@ -3,6 +3,7 @@
 
 import { isValidKey } from './dates.js';
 import { cleanRecipeItems } from './recipes.js';
+import { isValidSplit } from './calc.js';
 
 export const VERSION = 1;
 export const MEALS = ['breakfast', 'lunch', 'dinner', 'snacks'];
@@ -16,6 +17,8 @@ export function createInitialState() {
     profile: {
       sex: 'male', age: 25, heightCm: 175, weightKg: 75,
       activity: 'light', goal: 'keep', customGoal: null,
+      goalChange: null, // own deficit/surplus in kcal per day (null = default)
+      macroSplit: null, // own protein/carbs/fat % (null = 25/45/30)
     },
     log: {},
     customFoods: [],
@@ -195,6 +198,8 @@ function cleanProfile(p, defaults) {
     activity: typeof p.activity === 'string' ? p.activity : defaults.activity,
     goal: ['lose', 'keep', 'gain'].includes(p.goal) ? p.goal : defaults.goal,
     customGoal: inRange(p.customGoal, 500, 10000) ? p.customGoal : null,
+    goalChange: Number.isInteger(p.goalChange) && inRange(p.goalChange, -1500, 1000) && p.goalChange !== 0 ? p.goalChange : null,
+    macroSplit: isValidSplit(p.macroSplit) ? { p: p.macroSplit.p, c: p.macroSplit.c, f: p.macroSplit.f } : null,
   };
 }
 

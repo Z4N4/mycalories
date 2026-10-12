@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  bmr, tdee, dailyGoal, macroTargets, gramsFor, nutritionFor, sumEntries, periodSummary,
+  bmr, tdee, dailyGoal, macroTargets, gramsFor, nutritionFor, sumEntries, periodSummary, isValidSplit, kgPerWeek,
 } from '../js/core/calc.js';
 
 const man = { sex: 'male', age: 30, heightCm: 180, weightKg: 80, activity: 'moderate', goal: 'keep', customGoal: null };
@@ -31,8 +31,31 @@ test('dailyGoal uses customGoal when set', () => {
   assert.equal(dailyGoal({ ...man, customGoal: 1800 }), 1800);
 });
 
-test('macroTargets splits 25/45/30', () => {
+test('macroTargets splits 25/45/30 by default', () => {
   assert.deepEqual(macroTargets(2000), { p: 125, c: 225, f: 67 });
+});
+
+test('macroTargets uses the user\'s own split', () => {
+  assert.deepEqual(macroTargets(2000, { p: 35, c: 35, f: 30 }), { p: 175, c: 175, f: 67 });
+  assert.deepEqual(macroTargets(2000, null), { p: 125, c: 225, f: 67 });
+});
+
+test('dailyGoal uses the chosen deficit or surplus size', () => {
+  assert.equal(dailyGoal({ ...man, goal: 'lose', goalChange: -750 }), 2010);
+  assert.equal(dailyGoal({ ...man, goal: 'gain', goalChange: 500 }), 3260);
+  assert.equal(dailyGoal({ ...man, goal: 'keep', goalChange: -750 }), 2760); // ignored when keeping weight
+});
+
+test('isValidSplit needs whole percentages that add up to 100', () => {
+  assert.equal(isValidSplit({ p: 30, c: 40, f: 30 }), true);
+  assert.equal(isValidSplit({ p: 30, c: 40, f: 20 }), false);
+  assert.equal(isValidSplit({ p: 2, c: 68, f: 30 }), false);
+  assert.equal(isValidSplit(null), false);
+});
+
+test('kgPerWeek turns a daily deficit into weekly weight change', () => {
+  assert.equal(kgPerWeek(-500), -0.45);
+  assert.equal(kgPerWeek(250), 0.23);
 });
 
 const food = {

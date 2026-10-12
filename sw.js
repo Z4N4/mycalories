@@ -1,7 +1,7 @@
 // Service worker: keeps a copy of the app on the phone so it opens offline.
 // Bump CACHE whenever any file changes so phones pick up the new version.
 
-const CACHE = 'mycalories-v6';
+const CACHE = 'mycalories-v8';
 const ASSETS = [
   './',
   './index.html',
@@ -55,6 +55,7 @@ const ASSETS = [
   './js/ui/sheet.js',
   './js/views/aiSettings.js',
   './js/views/backup.js',
+  './js/views/goalSettings.js',
   './js/views/installCard.js',
   './js/views/month.js',
   './js/views/onboarding.js',

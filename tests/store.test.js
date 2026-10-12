@@ -134,6 +134,15 @@ test('parseBackup keeps only known fields and sane values', () => {
   assert.equal(s.customFoods[0].junk, undefined);
 });
 
+test('parseBackup keeps a valid deficit and macro split, drops invalid ones', () => {
+  const good = parseBackup(JSON.stringify({ version: 1, profile: { goal: 'lose', goalChange: -750, macroSplit: { p: 35, c: 35, f: 30 } } }));
+  assert.equal(good.profile.goalChange, -750);
+  assert.deepEqual(good.profile.macroSplit, { p: 35, c: 35, f: 30 });
+  const bad = parseBackup(JSON.stringify({ version: 1, profile: { goalChange: -5000, macroSplit: { p: 50, c: 50, f: 50 } } }));
+  assert.equal(bad.profile.goalChange, null);
+  assert.equal(bad.profile.macroSplit, null);
+});
+
 test('parseBackup drops malformed entries and fills missing fields', () => {
   const raw = { version: 1, log: { '2026-10-12': [entry({ id: 'x' }), { kcal: 'lots' }] } };
   const restored = parseBackup(JSON.stringify(raw));

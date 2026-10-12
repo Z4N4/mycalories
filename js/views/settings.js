@@ -1,10 +1,9 @@
 // Settings: language, your details, daily goal, my foods, backup, reset.
 
-import { h, fmt, parseNumber } from '../ui/dom.js';
+import { h, fmt } from '../ui/dom.js';
 import { icon } from '../ui/icons.js';
 import { openSheet } from '../ui/sheet.js';
-import { segmented, numberField, fieldError } from '../ui/controls.js';
-import { dailyGoal } from '../core/calc.js';
+import { segmented } from '../ui/controls.js';
 import { setSettings, setProfile, setWeight, createInitialState } from '../core/store.js';
 import { todayKey } from '../core/dates.js';
 import { LANG_LABELS } from '../i18n/strings.js';
@@ -12,6 +11,7 @@ import { profileForm } from './profileForm.js';
 import { openCustomFood } from '../sheets/customFood.js';
 import { exportBackup, importBackup, copyAllData, openRestoreSheet } from './backup.js';
 import { aiSection } from './aiSettings.js';
+import { goalSection } from './goalSettings.js';
 import { clearPhotos } from '../services/photos.js';
 
 function section(title, iconName, ...children) {
@@ -38,37 +38,6 @@ function openProfile(app) {
       },
     }, t('save')),
   });
-}
-
-function goalSection(app) {
-  const { t, goal, macros } = app.d;
-  const { profile } = app.state;
-  const calculated = dailyGoal({ ...profile, customGoal: null });
-  const custom = Number.isFinite(profile.customGoal);
-  const own = numberField({ id: 'own-goal', label: t('useMyOwnGoal'), value: custom ? profile.customGoal : '', unit: t('kcal'), placeholder: String(calculated) });
-  const errorSlot = h('div');
-
-  const saveOwn = () => {
-    const n = parseNumber(own.input.value);
-    if (!(n >= 800 && n <= 6000)) {
-      errorSlot.replaceChildren(fieldError(`${t('errNumber')} (800–6000)`));
-      return;
-    }
-    app.commit(setProfile(app.state, { customGoal: Math.round(n) }), t('saved'));
-  };
-
-  return section(t('dailyGoal'), 'target',
-    h('div', { class: 'goal-now' }, h('strong', null, fmt(goal)), h('span', null, ` ${t('kcal')}`)),
-    h('p', { class: 'muted small' }, `${t('macroTargets')}: ${macros.p} / ${macros.c} / ${macros.f} ${t('gramShort')}`),
-    h('div', { class: 'list-row' },
-      h('span', { class: 'grow' }, t('calculatedGoal')),
-      h('strong', null, `${fmt(calculated)} ${t('kcal')}`)),
-    h('div', { class: 'inline-form' }, own.el, h('button', { class: 'btn', onClick: saveOwn }, t('save'))),
-    errorSlot,
-    custom && h('button', {
-      class: 'link-btn',
-      onClick: () => app.commit(setProfile(app.state, { customGoal: null }), t('saved')),
-    }, t('useCalculated')));
 }
 
 function profileSection(app) {

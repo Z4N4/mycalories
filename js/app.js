@@ -75,7 +75,7 @@ function derive() {
     for: state,
     value: {
       foods, foodsById: new Map(foods.map((f) => [f.id, f])),
-      lang, t: makeT(lang), goal, macros: macroTargets(goal),
+      lang, t: makeT(lang), goal, macros: macroTargets(goal, state.profile.macroSplit),
     },
   };
   return cache.value;
