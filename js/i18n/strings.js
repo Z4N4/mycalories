@@ -219,6 +219,33 @@ const S = {
   myRecipe: ['ڕەچەتا من', 'وصفتي', 'my recipe'],
   remove: ['لابە', 'إزالة', 'Remove'],
 
+  // ---------- Photos ----------
+  addPhoto: ['وێنەیێ خۆ زێدە بکە', 'أضف صورتك', 'Add your photo'],
+  changePhoto: ['وێنەی بگوهۆڕە', 'غيّر الصورة', 'Change photo'],
+  removePhoto: ['وێنەی ژێببە', 'احذف الصورة', 'Remove photo'],
+  photoSaved: ['وێنە هاتە پاشەکەفتکرن ✓', 'تم حفظ الصورة ✓', 'Photo saved ✓'],
+  photoFailed: ['وێنە نەهاتە پاشەکەفتکرن', 'تعذّر حفظ الصورة', 'Could not save the photo'],
+
+  // ---------- Moving data to the Home Screen app ----------
+  installTitle: ['MyCalories بکە ئەپ ل سەر شاشێ', 'ثبّت MyCalories كتطبيق', 'Install MyCalories as an app'],
+  installStep1: ['ل «داتایێن من کۆپی بکە» بدە (ل خوارێ).', 'اضغط «انسخ بياناتي» (في الأسفل).', 'Tap "Copy my data" below.'],
+  installStep2: ['ل Safari ل سەر ⬆️ بدە، پاشی «Add to Home Screen».', 'في Safari اضغط ⬆️ ثم «Add to Home Screen».', 'In Safari tap ⬆️, then "Add to Home Screen".'],
+  installStep3: ['ئەپێ نوو ل سەر شاشێ ڤەکە و ل «داتایێن من ڤەگەڕینە» بدە. ئایفۆن داتایێن Safari و ئەپێ ژێک جودا دپارێزیت، لەوما ئەڤ گاڤە پێدڤییە.', 'افتح التطبيق الجديد واضغط «استعادة بياناتي». الآيفون يحفظ بيانات Safari والتطبيق بشكل منفصل، لذلك هذه الخطوة ضرورية.', 'Open the new Home Screen app and tap "Restore my data". iPhone keeps Safari and Home Screen apps separate, so this step is needed.'],
+  copyData: ['داتایێن من کۆپی بکە', 'انسخ بياناتي', 'Copy my data'],
+  dataCopied: ['هەمی داتا هاتنە کۆپیکرن ✓ نوکە ئەپێ ل سەر شاشێ ڤەکە و «داتایێن من ڤەگەڕینە» بدە.', 'تم نسخ كل البيانات ✓ افتح التطبيق من الشاشة الرئيسية واضغط «استعادة بياناتي».', 'All data copied ✓ Now open the Home Screen app and tap "Restore my data".'],
+  copyFallback: ['ئەڤێ نڤیسینێ هەمیێ کۆپی بکە (Select All ← Copy):', 'انسخ هذا النص كاملاً (تحديد الكل ← نسخ):', 'Copy all of this text (Select All → Copy):'],
+  restoreData: ['داتایێن من ڤەگەڕینە', 'استعادة بياناتي', 'Restore my data'],
+  restoreHint: ['ئەگەر تە ل Safari «داتایێن من کۆپی بکە» دابیت، ل «Paste» بدە. یان فایلێ پاشەکەفتێ هەلبژێرە.', 'إذا ضغطت «انسخ بياناتي» في Safari، اضغط «لصق». أو اختر ملف النسخة الاحتياطية.', 'If you tapped "Copy my data" in Safari, tap Paste. Or choose a backup file.'],
+  pasteData: ['داتایان دانە (Paste)', 'لصق البيانات', 'Paste my data'],
+  pasteManual: ['یان ل ڤێرە بگرە و Paste بکە:', 'أو اضغط هنا والصق:', 'Or tap here and paste:'],
+  pasteHere: ['ل ڤێرە Paste بکە', 'الصق هنا', 'Paste here'],
+  pasteBlocked: ['Paste ڕێک نەهاتە دان. ل خانا خوارێ بگرە و Paste بکە.', 'لم يُسمح باللصق. اضغط على المربع في الأسفل والصق.', 'Paste was blocked. Tap the box below and paste.'],
+  nothingToPaste: ['چ داتا د کۆپیێ دا نینن', 'لا توجد بيانات منسوخة', 'There is no copied data'],
+  alreadyUser: ['من بەری نوکە MyCalories بکارئینایە — داتایێن من ڤەگەڕینە', 'أستخدم MyCalories من قبل — استعادة بياناتي', 'I already use MyCalories — restore my data'],
+  transferHint: ['بۆ ڤەگوهاستنا داتایان بۆ ئەپێ ل سەر شاشێ یان مۆبایلەکا دی:', 'لنقل البيانات إلى تطبيق الشاشة الرئيسية أو هاتف آخر:', 'To move your data to the Home Screen app or another phone:'],
+  hide: ['ڤەشێرە', 'إخفاء', 'Hide'],
+  photosPreparing: ['وێنە دهێنە ئامادەکرن… پشتی چەند چرکەیان دووبارە بکە.', 'جارٍ تجهيز الصور… حاول بعد ثوانٍ.', 'Getting your photos ready… try again in a few seconds.'],
+
   // ---------- AI settings ----------
   aiSection: ['شلۆڤەکرنا وێنەیان (Gemini)', 'تحليل الصور (Gemini)', 'Photo analysis (Gemini)'],
   aiHowTo: ['1. ل aistudio.google.com/apikey ب حسابێ Google بچە ژوور.  2. ل سەر «Create API key» بدە.  3. کلیلێ کۆپی بکە و ل ڤێرە دانە. بێ بەرامبەرە.', '1. ادخل إلى aistudio.google.com/apikey بحساب Google.  2. اضغط «Create API key».  3. انسخ المفتاح والصقه هنا. مجاني.', '1. Sign in at aistudio.google.com/apikey with a Google account.  2. Tap "Create API key".  3. Copy the key and paste it here. It\'s free.'],

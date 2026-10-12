@@ -4,6 +4,14 @@
 const MAX_SIDE = 1024;
 const JPEG_QUALITY = 0.82;
 
+/** Square-ish small JPEG Blob for a food photo (keeps the app light). */
+export function photoToBlob(file, maxSide = 640) {
+  return shrinkImage(file, maxSide).then(({ dataUrl }) => {
+    const bytes = Uint8Array.from(atob(dataUrl.slice(dataUrl.indexOf(',') + 1)), (ch) => ch.charCodeAt(0));
+    return new Blob([bytes], { type: 'image/jpeg' });
+  });
+}
+
 /**
  * @param {File} file
  * @param {number} [maxSide] longest side in pixels (keeps iPhone canvases under Safari's size limit)

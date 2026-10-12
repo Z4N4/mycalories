@@ -13,6 +13,7 @@ import { renderPlan } from './views/plan.js';
 import { renderStats } from './views/stats.js';
 import { renderWeight } from './views/weight.js';
 import { renderSettings } from './views/settings.js';
+import { loadPhotos } from './services/photos.js';
 
 const TABS = [
   { id: 'today', icon: 'today', label: 'tabToday', render: renderToday },
@@ -28,7 +29,40 @@ const storage = (() => {
 
 const loaded = storage ? loadState(storage) : { state: null, error: 'storage' };
 let state = loaded.state ?? loadState({ getItem: () => null, setItem: () => {} }).state;
-let ui = { tab: 'today', date: todayKey(), today: todayKey() };
+// Where the user was (tab, day, scroll), so reopening the app continues there.
+const UI_KEY = 'mycalories.ui';
+const TAB_IDS = ['today', 'plan', 'stats', 'weight', 'settings'];
+
+function loadUi() {
+  const fresh = { tab: 'today', date: todayKey(), today: todayKey() };
+  try {
+    const saved = JSON.parse(storage?.getItem(UI_KEY) ?? 'null');
+    if (!saved || !TAB_IDS.includes(saved.tab)) return fresh;
+    const sameDay = saved.savedOn === todayKey();
+    return {
+      ...fresh,
+      tab: saved.tab,
+      statsMode: saved.statsMode === 'month' ? 'month' : 'week',
+      // A day picked yesterday shouldn't stick; on a new day start from today.
+      ...(sameDay && typeof saved.date === 'string' ? { date: saved.date } : {}),
+      ...(sameDay && typeof saved.planDate === 'string' ? { planDate: saved.planDate } : {}),
+      scrollY: sameDay && Number.isFinite(saved.scrollY) ? saved.scrollY : 0,
+    };
+  } catch {
+    return fresh;
+  }
+}
+
+function saveUi() {
+  try {
+    storage?.setItem(UI_KEY, JSON.stringify({
+      tab: ui.tab, statsMode: ui.statsMode, date: ui.date, planDate: ui.planDate,
+      scrollY: Math.round(window.scrollY), savedOn: todayKey(),
+    }));
+  } catch { /* storage full or blocked: not important */ }
+}
+
+let ui = loadUi();
 let cache = { for: null, value: null };
 
 /** Values computed from the state, recomputed only when the state changes. */
@@ -64,11 +98,13 @@ export const app = {
     ui = { ...ui, tab, ...patch };
     render();
     window.scrollTo({ top: 0 });
+    saveUi();
   },
 
   setUi(patch) {
     ui = { ...ui, ...patch };
     render();
+    saveUi();
   },
 };
 
@@ -96,14 +132,21 @@ export function render() {
 
 // When the app is reopened on a new day, jump "Today" forward.
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState !== 'visible') return;
+  if (document.visibilityState !== 'visible') { saveUi(); return; }
   const now = todayKey();
   if (now === ui.today) return;
   ui = { ...ui, today: now, date: ui.date === ui.today ? now : ui.date };
   render();
 });
 
+window.addEventListener('pagehide', saveUi);
+
+// Photos live in IndexedDB; wait for them briefly so the first screen shows them.
+const photosLoading = loadPhotos();
+const photosInTime = await Promise.race([photosLoading.then(() => true), new Promise((resolve) => { setTimeout(() => resolve(false), 1500); })]);
+if (!photosInTime) photosLoading.then(render);
 render();
+if (ui.scrollY) requestAnimationFrame(() => window.scrollTo({ top: ui.scrollY }));
 if (loaded.error === 'corrupt') toast(derive().t('dataCorrupt'));
 if (loaded.error === 'storage') toast(derive().t('storageBlocked'));
 

@@ -7,6 +7,7 @@ import { setSettings, setProfile, setWeight } from '../core/store.js';
 import { dailyGoal, macroTargets } from '../core/calc.js';
 import { todayKey } from '../core/dates.js';
 import { profileForm } from './profileForm.js';
+import { openRestoreSheet } from './backup.js';
 
 function languageStep(app) {
   const { t, lang } = app.d;
@@ -24,7 +25,12 @@ function languageStep(app) {
           app.commit(setSettings(app.state, { lang: code }));
           app.setUi({ onboardStep: 1 });
         },
-      }, label, h('span', { class: 'choice-check' }, icon('check'))))));
+      }, label, h('span', { class: 'choice-check' }, icon('check'))))),
+    // Data entered in Safari doesn't reach the Home Screen app by itself.
+    h('button', {
+      class: 'btn restore-btn',
+      onClick: () => openRestoreSheet(app, () => app.go('today', { date: todayKey() })),
+    }, icon('upload'), t('alreadyUser')));
 }
 
 function profileStep(app) {

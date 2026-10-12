@@ -13,6 +13,7 @@ import { CATEGORY_NAMES, MEAL_NAMES } from '../i18n/strings.js';
 import { overrideEditor } from './overrideEditor.js';
 import { openCustomFood } from './customFood.js';
 import { openRecipeEditor } from './recipeEditor.js';
+import { photoPanel } from './foodPhoto.js';
 
 const QUICK_QTY = [0.5, 1, 1.5, 2, 3];
 const QUICK_GRAMS = [50, 100, 150, 200, 300];
@@ -178,7 +179,10 @@ export function openFoodDetail(app, { food: startFood, dateKey, meal: startMeal,
     food.adhoc ? '' : (CATEGORY_NAMES[food.cat]?.[lang] ?? ''),
     food.edited ? h('span', { class: 'badge' }, t('editedBadge')) : '');
   renderMeta();
+  // Photo changes only affect pictures, so just ask lists to redraw.
+  const photoChanged = () => { app.setUi({}); onChange?.(); };
   const body = h('div', { class: 'stack detail' },
+    food.adhoc ? '' : photoPanel(app, food, photoChanged),
     metaEl,
     h('div', { class: 'field' }, h('span', { class: 'field-label' }, t('portion')), unitsEl),
     h('div', { class: 'field' },

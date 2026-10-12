@@ -3,6 +3,7 @@
 
 import { h, fmt } from '../ui/dom.js';
 import { icon } from '../ui/icons.js';
+import { foodThumb } from '../ui/foodThumb.js';
 import { segmented } from '../ui/controls.js';
 import { dayLabel, fullDate, portionText } from '../ui/labels.js';
 import { planDay } from '../core/planner.js';
@@ -34,6 +35,7 @@ function mealCard(app, dateKey, m) {
       h('h3', null, MEAL_NAMES[m.meal][lang]),
       h('span', { class: 'meal-kcal' }, `${fmt(m.kcal)} ${t('kcal')}`)),
     h('div', { class: 'entries' }, m.items.map((item) => h('div', { class: 'entry static' },
+      foodThumb(item.food, 'sm'),
       h('span', { class: 'entry-text' },
         h('span', { class: 'entry-name' }, foodName(item.food, lang)),
         h('span', { class: 'entry-sub' }, portionText(item.unit, item.qty, item.grams, lang, item.food, t))),

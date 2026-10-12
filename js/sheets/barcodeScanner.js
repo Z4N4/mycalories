@@ -6,7 +6,9 @@ import { icon } from '../ui/icons.js';
 import { openSheet } from '../ui/sheet.js';
 import { cleanBarcode, isValidBarcode } from '../core/barcode.js';
 import { findCustomByBarcode, saveCustomFood } from '../core/store.js';
-import { lookupBarcode } from '../services/openFoodFacts.js';
+import { lookupBarcode, fetchProductImage } from '../services/openFoodFacts.js';
+import { savePhoto } from '../services/photos.js';
+import { photoToBlob } from '../services/image.js';
 import { shrinkImage } from '../services/image.js';
 import { openFoodDetail } from './foodDetail.js';
 import { openCustomFood } from './customFood.js';
@@ -100,8 +102,18 @@ export function openBarcodeScanner(app, { dateKey, meal, onChange }) {
     const result = await lookupBarcode(code, lang);
     if (result.status === 'found') {
       const next = saveCustomFood(app.state, result.food); // saved even if the sheet was closed meanwhile
+      const newId = next.customFoods[0].id;
       app.commit(next, t('productSaved'));
-      if (!closed) openFood(next.customFoods[0].id);
+      // The package photo, when the database has one, becomes the food's picture.
+      fetchProductImage(result.imageUrl)
+        .then(async (blob) => {
+          // The food may have been deleted (or data restored) while downloading.
+          if (!blob || !app.state.customFoods.some((c) => c.id === newId)) return;
+          await savePhoto(newId, await photoToBlob(blob, 480));
+          app.setUi({});
+        })
+        .catch(() => {});
+      if (!closed) openFood(newId);
       return;
     }
     if (closed) return;

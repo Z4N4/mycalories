@@ -3,6 +3,7 @@
 
 import { h, fmt, parseNumber } from '../ui/dom.js';
 import { icon } from '../ui/icons.js';
+import { foodThumb } from '../ui/foodThumb.js';
 import { openSheet } from '../ui/sheet.js';
 import { unitName } from '../ui/labels.js';
 import { recipeTotals, MAX_INGREDIENTS, MAX_INGREDIENT_G } from '../core/recipes.js';
@@ -37,7 +38,7 @@ function openIngredientPicker(app, onPick) {
     list.replaceChildren(...shown.map((food) => h('button', {
       class: 'food-row',
       onClick: () => { sheet.close(); onPick(food); },
-    }, h('span', { class: 'food-text' }, h('span', { class: 'food-name' }, foodName(food, lang))), h('span', { class: 'food-add' }, icon('plus')))));
+    }, foodThumb(food, 'md'), h('span', { class: 'food-text' }, h('span', { class: 'food-name' }, foodName(food, lang))), h('span', { class: 'food-add' }, icon('plus')))));
   };
   input.addEventListener('input', render);
   const sheet = openSheet({
@@ -75,6 +76,7 @@ export function openRecipeEditor(app, food, onSaved) {
       if (g > 0) setGrams(index, g); else grams.value = String(item.g);
     });
     return h('div', { class: 'ing-row' },
+      foodThumb(ing, 'sm'),
       h('div', { class: 'ing-main' },
         h('span', { class: 'ing-name' }, ing ? foodName(ing, lang) : item.id),
         h('div', { class: 'ai-controls' },

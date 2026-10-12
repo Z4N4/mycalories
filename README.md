@@ -25,6 +25,8 @@ It runs as a web app that you add to your iPhone Home Screen. Once installed, it
   [aistudio.google.com/apikey](https://aistudio.google.com/apikey), entered in Settings and stored only on the phone
 - **Favorites, recent foods, and your own foods**; you can also change the numbers of any built-in dish
 - **Private**: everything stays on your phone. **Backup / restore** as a file from Settings
+- **Pictures for every food** (colour food icons), and you can add your own photo to any food; scanned products get their package photo
+- **Move your data** from Safari to the Home Screen app (Copy my data → Restore my data), and the app reopens where you left it
 - Light and dark mode follow the iPhone setting
 
 ## Install on iPhone

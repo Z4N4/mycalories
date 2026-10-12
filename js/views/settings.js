@@ -10,8 +10,9 @@ import { todayKey } from '../core/dates.js';
 import { LANG_LABELS } from '../i18n/strings.js';
 import { profileForm } from './profileForm.js';
 import { openCustomFood } from '../sheets/customFood.js';
-import { exportBackup, importBackup } from './backup.js';
+import { exportBackup, importBackup, copyAllData, openRestoreSheet } from './backup.js';
 import { aiSection } from './aiSettings.js';
+import { clearPhotos } from '../services/photos.js';
 
 function section(title, iconName, ...children) {
   return h('section', { class: 'card stack' }, h('h2', { class: 'section-title' }, icon(iconName), title), ...children);
@@ -107,11 +108,16 @@ function dataSection(app) {
     h('div', { class: 'grid-2' },
       h('button', { class: 'btn', onClick: () => exportBackup(app) }, icon('download'), t('exportData')),
       h('button', { class: 'btn', onClick: () => fileInput.click() }, icon('upload'), t('importData'))),
+    h('p', { class: 'muted small' }, t('transferHint')),
+    h('div', { class: 'grid-2' },
+      h('button', { class: 'btn', onClick: () => copyAllData(app) }, icon('copy'), t('copyData')),
+      h('button', { class: 'btn', onClick: () => openRestoreSheet(app) }, icon('download'), t('restoreData'))),
     fileInput,
     h('button', {
       class: 'btn danger-ghost',
       onClick: () => {
         if (!window.confirm(t('resetConfirm'))) return;
+        clearPhotos().catch(() => {});
         app.commit(setSettings(createInitialState(), { lang: app.state.settings.lang }));
         app.setUi({ onboardStep: 0 });
       },

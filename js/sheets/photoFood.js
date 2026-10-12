@@ -3,6 +3,7 @@
 
 import { h, fmt, parseNumber } from '../ui/dom.js';
 import { icon } from '../ui/icons.js';
+import { foodThumb } from '../ui/foodThumb.js';
 import { openSheet, closeAllSheets } from '../ui/sheet.js';
 import { segmented } from '../ui/controls.js';
 import { nutritionFor } from '../core/calc.js';
@@ -53,6 +54,7 @@ function itemRow(app, item, onChange) {
   }, icon('check'));
   const row = h('div', { class: 'ai-row' },
     toggle,
+    foodThumb(item.food, 'sm'),
     h('div', { class: 'ai-main' },
       h('span', { class: 'ai-name' }, foodName(item.food, lang),
         item.confidence === 'low' ? h('span', { class: 'badge warn' }, t('notSure')) : ''),

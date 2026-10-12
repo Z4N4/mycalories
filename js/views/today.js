@@ -2,6 +2,7 @@
 
 import { h, fmt } from '../ui/dom.js';
 import { icon } from '../ui/icons.js';
+import { foodThumb } from '../ui/foodThumb.js';
 import { ring } from '../ui/charts.js';
 import { dayLabel, fullDate, portionText } from '../ui/labels.js';
 import { sumEntries } from '../core/calc.js';
@@ -11,6 +12,7 @@ import { MEAL_NAMES } from '../i18n/strings.js';
 import { entryName } from '../foods/index.js';
 import { openAddFood } from '../sheets/addFood.js';
 import { openEntry } from '../sheets/foodDetail.js';
+import { installCard } from './installCard.js';
 
 function dateNav(app, key) {
   const { t, lang } = app.d;
@@ -75,6 +77,7 @@ function entryRow(app, key, entry) {
   const { lang, t, foodsById } = app.d;
   const food = foodsById.get(entry.foodId);
   return h('button', { class: 'entry', onClick: () => openEntry(app, key, entry) },
+    foodThumb(food, 'sm'),
     h('span', { class: 'entry-text' },
       h('span', { class: 'entry-name' }, entryName(entry, foodsById, lang)),
       h('span', { class: 'entry-sub' }, portionText(entry.unit, entry.qty, entry.grams, lang, food, t))),
@@ -103,6 +106,7 @@ export function renderToday(app) {
   const entries = app.state.log[key] ?? [];
   return h('div', { class: 'page' },
     dateNav(app, key),
+    installCard(app),
     summary(app, sumEntries(entries)),
     MEALS.map((meal) => mealCard(app, key, meal, entries.filter((e) => e.meal === meal))));
 }

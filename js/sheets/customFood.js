@@ -5,6 +5,7 @@ import { icon } from '../ui/icons.js';
 import { openSheet } from '../ui/sheet.js';
 import { numberField, textField, fieldError } from '../ui/controls.js';
 import { saveCustomFood, deleteCustomFood } from '../core/store.js';
+import { deletePhoto } from '../services/photos.js';
 
 const MAX_KCAL = 5000;
 const MAX_MACRO = 500;
@@ -65,6 +66,7 @@ export function openCustomFood(app, existing, onDone, prefill = {}) {
 
   function remove() {
     if (!window.confirm(t('deleteFoodConfirm'))) return;
+    deletePhoto(existing.id).catch(() => {});
     app.commit(deleteCustomFood(app.state, existing.id), t('deleted'));
     sheet.close();
     onDone?.();

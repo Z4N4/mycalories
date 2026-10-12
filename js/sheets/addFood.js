@@ -2,6 +2,7 @@
 
 import { h, fmt, fmtQty } from '../ui/dom.js';
 import { icon } from '../ui/icons.js';
+import { foodThumb } from '../ui/foodThumb.js';
 import { openSheet } from '../ui/sheet.js';
 import { unitName } from '../ui/labels.js';
 import { searchFoods } from '../core/search.js';
@@ -38,6 +39,7 @@ function foodRow(app, food, onPick) {
   const kcal = nutritionFor(food, portion.g).kcal;
   const isFav = app.state.favorites.includes(food.id);
   return h('button', { class: 'food-row', onClick: () => onPick(food) },
+    foodThumb(food, 'md'),
     h('span', { class: 'food-text' },
       h('span', { class: 'food-name' }, foodName(food, lang), isFav && icon('star', 'fav-mark')),
       h('span', { class: 'food-sub' }, `${fmtQty(1)} ${unitName(portion.unit, lang, food)} · ${fmt(kcal)} ${t('kcal')}`)),
