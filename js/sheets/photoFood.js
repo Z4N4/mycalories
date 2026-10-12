@@ -97,9 +97,11 @@ export function openPhotoFood(app, { dateKey, meal: startMeal, onChange }) {
     return items.filter((i) => i.on).reduce((s, i) => s + nutritionFor(i.food, i.grams).kcal, 0);
   }
 
+  let added = false; // a double tap must not add everything twice
   function addAll() {
     const chosen = items.filter((i) => i.on && i.grams > 0);
-    if (!chosen.length) return;
+    if (!chosen.length || added) return;
+    added = true;
     const next = chosen.reduce((state, i) => addEntry(state, dateKey, {
       foodId: i.custom ? 'ai_other' : i.food.id, meal, unit: 'g', qty: i.grams, grams: i.grams,
       ...nutritionFor(i.food, i.grams), name: i.custom ? i.food.name : i.food.n,

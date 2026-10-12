@@ -232,6 +232,23 @@ const S = {
   myRecipe: ['ڕەچەتا من', 'وصفتي', 'my recipe'],
   remove: ['لابە', 'إزالة', 'Remove'],
 
+  // ---------- Type what you ate ----------
+  quickAdd: ['بنڤیسە', 'اكتب', 'Type it'],
+  quickTitle: ['تە چ خوار؟ بنڤیسە', 'اكتب ماذا أكلت', 'Write what you ate'],
+  quickHint: ['ب زمانێ خۆ بنڤیسە، ب ژمارە و پشک یان گرام. تشتەک ب خۆ زێدە نابیت؛ پێشیێ دێ نیشا تە دەین دا کونترۆل بکەی.', 'اكتب بلغتك مع الكمية بالغرام أو الحصص. لن يُضاف شيء تلقائياً؛ ستراه أولاً لتتحقق منه.', 'Write in your own words, with amounts in grams or portions. Nothing is added by itself; you’ll see it first to check.'],
+  quickPlaceholder: ['200 گرام برنج و 100 گرام سنگێ مریشکێ، 2 سەموون، ئیستکانەک چای', '200 غرام تمن و 100 غرام صدر دجاج، 2 صمون، استكان چاي', '200g rice and 100g chicken breast, 2 samoon, 1 tea'],
+  quickEx1: ['200 گرام برنج', '200 غرام تمن', '200g rice'],
+  quickEx2: ['2 سەموون', '2 صمون', '2 samoon'],
+  quickEx3: ['نیڤ قاپ دۆلمە', 'نص صحن دولمة', 'half plate dolma'],
+  quickUnderstand: ['ببینە کا چ هاتە فامکرن', 'اعرض ما فُهم', 'Show what you understood'],
+  quickReview: ['ئەڤە هاتنە دیتن. ل سەر ناڤێ خوارنێ بدە دا بگوهۆڕی، یان چەندیێ بگوهۆڕە. ل سەر × بدە دا لابەی.', 'هذا ما وُجد. اضغط على اسم الطعام لتغييره، أو عدّل الكمية. اضغط × للإزالة.', 'Here’s what was found. Tap a food’s name to change it, or edit the amount. Tap × to leave it out.'],
+  quickNothing: ['چ خوارن نەهاتنە نیاسین. ب ناڤێ خوارنێ و ژمارە بنڤیسە، یان خوارنێ ب دەستی هەلبژێرە.', 'لم يتم التعرف على أي طعام. اكتب اسم الطعام والكمية، أو اختره يدوياً.', 'No foods were recognized. Write the food name and amount, or choose the food by hand.'],
+  notMatched: ['نەهاتە دیتن', 'لم يُعثر عليه', 'Not found'],
+  chooseFood: ['خوارنێ هەلبژێرە', 'اختر الطعام', 'Choose food'],
+  editText: ['نڤیسینێ بگوهۆڕە', 'عدّل النص', 'Edit the text'],
+  addAsWritten: ['وەک تە نڤیسی زێدە بکە', 'أضف كما كتبت', 'Add as written'],
+  quickAdded: ['{n} خوارن هاتنە زێدەکرن ✓', 'تمت إضافة {n} أطعمة ✓', '{n} foods added ✓'],
+
   // ---------- Photos ----------
   addPhoto: ['وێنەیێ خۆ زێدە بکە', 'أضف صورتك', 'Add your photo'],
   changePhoto: ['وێنەی بگوهۆڕە', 'غيّر الصورة', 'Change photo'],

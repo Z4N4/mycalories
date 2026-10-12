@@ -13,6 +13,8 @@ import { openFoodDetail } from './foodDetail.js';
 import { openCustomFood } from './customFood.js';
 import { openBarcodeScanner } from './barcodeScanner.js';
 import { openPhotoFood } from './photoFood.js';
+import { openQuickEntry } from './quickEntry.js';
+import { looksLikeQuickEntry } from '../core/quickEntry.js';
 
 const MAX_SEARCH_RESULTS = 80;
 
@@ -84,8 +86,16 @@ export function openAddFood(app, dateKey, meal) {
       class: 'food-row create',
       onClick: () => openCustomFood(app, null, (food) => { refresh(); if (food) pick(food); }),
     }, h('span', { class: 'food-text' }, h('span', { class: 'food-name' }, t('createFood'))), h('span', { class: 'food-add' }, icon('edit')));
+    // Typed "200g rice and 2 samoon"? Offer to read it as a list of foods.
+    const asWritten = looksLikeQuickEntry(query) && h('button', {
+      class: 'food-row quick-suggest',
+      onClick: () => openQuickEntry(app, { dateKey, meal, text: query, onChange: refresh }),
+    }, h('span', { class: 'thumb md emoji' }, '✍️'),
+    h('span', { class: 'food-text' }, h('span', { class: 'food-name' }, t('addAsWritten')), h('span', { class: 'food-sub' }, '“', h('bdi', { dir: 'auto' }, query.trim()), '”')),
+    h('span', { class: 'food-add' }, icon('next', 'flip')));
     listEl.replaceChildren(
-      ...(foods.length ? foods.map((f) => foodRow(app, f, pick)) : [h('p', { class: 'empty' }, emptyText(t, filter, query))]),
+      asWritten || '',
+      ...(foods.length ? foods.map((f) => foodRow(app, f, pick)) : (asWritten ? [] : [h('p', { class: 'empty' }, emptyText(t, filter, query))])),
       (filter === 'mine' || query || !foods.length) ? create : '',
     );
   }
@@ -117,7 +127,9 @@ export function openAddFood(app, dateKey, meal) {
         h('button', { class: 'quick-btn', onClick: () => openBarcodeScanner(app, { dateKey, meal, onChange: refresh }) },
           icon('barcode'), t('scanBarcode')),
         h('button', { class: 'quick-btn', onClick: () => openPhotoFood(app, { dateKey, meal, onChange: refresh }) },
-          icon('camera'), t('photo'))),
+          icon('camera'), t('photo')),
+        h('button', { class: 'quick-btn', onClick: () => openQuickEntry(app, { dateKey, meal, onChange: refresh }) },
+          icon('edit'), t('quickAdd'))),
       h('div', { class: 'search-wrap' }, icon('search', 'search-icon'), input),
       chipsEl,
       listEl),

@@ -10,6 +10,7 @@ It runs as a web app that you add to your iPhone Home Screen. Once installed, it
 - **Food templates**: about 110 dishes are built from ingredients (rice, meat, oil, bread, sauces…). Open a dish → *View & edit ingredients* to change each one, so *your* shawarma has *your* calories
 - **Meal planner**: a full day of meals that fits your calorie goal (simple or traditional food), with *Swap* and *Add to diary*
 - **Local portions**: plate, half plate, piece, samoon, istikan, skewer, sandwich, cup, tablespoon… or exact **grams**
+- **Type what you ate**: "200g rice and 100g chicken breast, 2 samoon" in English, Arabic or Badini. The app shows what it understood; you check, change or remove lines, then add
 - **Search in any language**: `dolma`, `دولمة` and `دۆلمە` all find the same dish
 - **Daily goal**: calculated from sex, age, height, weight, activity and goal (lose / keep / gain), or your own number
 - **Protein / carbs / fat** for every food and every day

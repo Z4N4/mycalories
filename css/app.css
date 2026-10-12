@@ -532,6 +532,24 @@ body.cam-open { overflow: hidden; }
 .macro-total.ok { color: var(--accent); }
 .macro-total.bad { color: var(--over); }
 
+/* ---------- Type what you ate ---------- */
+.quick-actions { grid-template-columns: repeat(3, 1fr); }
+.quick-actions .quick-btn { font-size: 14px; gap: 6px; padding: 0 6px; }
+.quick-box { min-height: 120px; resize: vertical; line-height: 1.5; }
+.quick-examples .chip-btn { font-weight: 600; }
+.quick-list { display: flex; flex-direction: column; gap: 8px; }
+.quick-row { display: flex; gap: 10px; align-items: flex-start; padding: 12px; border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); transition: opacity .15s; }
+.quick-row.off { opacity: .4; }
+.quick-row.missing { border: 1.5px dashed var(--over); }
+.quick-food { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; text-align: start; color: var(--text); }
+.quick-food .icon { width: 15px; height: 15px; color: var(--accent); }
+.quick-typed { font-size: 12px; color: var(--text-3); }
+.quick-amount { display: flex; gap: 6px; flex: 1; min-width: 0; }
+.qty-mini { width: 74px; min-height: 40px; padding: 6px 8px; text-align: center; flex-shrink: 0; }
+.unit-select { min-height: 40px; padding: 6px 10px; flex: 1; min-width: 0; font-size: 15px; background-image: none; }
+.food-row.quick-suggest { background: var(--accent-soft); }
+.food-row.quick-suggest .food-name { color: var(--accent); }
+
 /* ---------- Small phones ---------- */
 @media (max-width: 370px) {
   .summary { grid-template-columns: 1fr; justify-items: center; }
