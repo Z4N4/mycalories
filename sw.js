@@ -1,7 +1,7 @@
 // Service worker: keeps a copy of the app on the phone so it opens offline.
 // Bump CACHE whenever any file changes so phones pick up the new version.
 
-const CACHE = 'mycalories-v10';
+const CACHE = 'mycalories-v13';
 const ASSETS = [
   './',
   './index.html',
@@ -12,11 +12,11 @@ const ASSETS = [
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
   './js/app.js',
+  './js/core/ai.js',
   './js/core/barcode.js',
   './js/core/calc.js',
   './js/core/dates.js',
   './js/core/persist.js',
-  './js/core/photoAi.js',
   './js/core/photoData.js',
   './js/core/planner.js',
   './js/core/quickEntry.js',
@@ -34,7 +34,10 @@ const ASSETS = [
   './js/foods/recipes.js',
   './js/foods/sweets-drinks.js',
   './js/i18n/strings.js',
+  './js/services/ai.js',
+  './js/services/aiError.js',
   './js/services/gemini.js',
+  './js/services/groq.js',
   './js/services/image.js',
   './js/services/openFoodFacts.js',
   './js/services/photos.js',
@@ -43,10 +46,12 @@ const ASSETS = [
   './js/sheets/customFood.js',
   './js/sheets/foodDetail.js',
   './js/sheets/foodPhoto.js',
+  './js/sheets/onlineSearch.js',
   './js/sheets/overrideEditor.js',
   './js/sheets/photoFood.js',
   './js/sheets/quickEntry.js',
   './js/sheets/recipeEditor.js',
+  './js/sheets/savedMeals.js',
   './js/ui/camera.js',
   './js/ui/charts.js',
   './js/ui/controls.js',

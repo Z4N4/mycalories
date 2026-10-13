@@ -10,7 +10,11 @@ It runs as a web app that you add to your iPhone Home Screen. Once installed, it
 - **Food templates**: about 110 dishes are built from ingredients (rice, meat, oil, bread, sauces…). Open a dish → *View & edit ingredients* to change each one, so *your* shawarma has *your* calories
 - **Meal planner**: a full day of meals that fits your calorie goal (simple or traditional food), with *Swap* and *Add to diary*
 - **Local portions**: plate, half plate, piece, samoon, istikan, skewer, sandwich, cup, tablespoon… or exact **grams**
-- **Type what you ate**: "200g rice and 100g chicken breast, 2 samoon" in English, Arabic or Badini. The app shows what it understood; you check, change or remove lines, then add
+- **Type what you ate**: "200g rice and 100g chicken breast, 2 samoon" in English, Arabic or Badini. The app shows what it understood; you check, change or remove lines, then add.
+  Forgiving: typos ("chiken"), no commas ("rice 200g chicken 100g"), chatty words ("for lunch I had…", "أكلت"), and suggestions while typing.
+  Lines it can't read (or only guessed) go to the AI, if a key is set
+- **Search online**: any food or drink in the world: packaged products from Open Food Facts plus an AI estimate; the one you pick is saved to *My foods*
+- **Saved meals**: tap 🔖 on a meal to save it (e.g. your usual breakfast), then add it again from *My meals* with one tap
 - **Search in any language**: `dolma`, `دولمة` and `دۆلمە` all find the same dish
 - **Daily goal**: calculated from sex, age, height, weight, activity and goal (lose / keep / gain), or your own number
 - **Protein / carbs / fat** for every food and every day
@@ -21,9 +25,10 @@ It runs as a web app that you add to your iPhone Home Screen. Once installed, it
 - **Barcode scanning**: live camera, typed number, or a photo of the barcode. Products come from the free
   [Open Food Facts](https://world.openfoodfacts.org) database; unknown products are entered once from the label
   and remembered (works offline after that)
-- **Calories from a photo**: Google Gemini (free tier) recognizes the dishes, matches them to the food list and
-  estimates the grams. You check the amounts before anything is added. Needs a free key from
-  [aistudio.google.com/apikey](https://aistudio.google.com/apikey), entered in Settings and stored only on the phone
+- **Calories from a photo**: AI recognizes the dishes, matches them to the food list and estimates the grams.
+  You check the amounts before anything is added. Uses a free key from [Groq](https://console.groq.com/keys)
+  (recommended: fast) or [Google AI Studio](https://aistudio.google.com/apikey), entered in Settings → AI and
+  stored only on the phone (never in backups)
 - **Favorites, recent foods, and your own foods**; you can also change the numbers of any built-in dish
 - **Private**: everything stays on your phone. **Backup / restore** as a file from Settings
 - **Pictures for every food** (colour food icons), and you can add your own photo to any food; scanned products get their package photo
@@ -64,7 +69,7 @@ npm run serve          # http://localhost:5173
 | `js/i18n/` | All text in Badini, Arabic, English |
 | `js/views/`, `js/sheets/` | Screens and bottom sheets |
 | `js/ui/` | DOM helper, icons, charts, sheets, form controls |
-| `js/services/` | Network: Open Food Facts lookup, Gemini photo analysis, photo resizing |
+| `js/services/` | Network: Open Food Facts lookup and search, AI (Groq or Gemini), photo storage and resizing |
 | `vendor/` | [@zxing/library](https://github.com/zxing-js/library) 0.23 barcode decoder (Apache-2.0), loaded on demand |
 | `tools/` | Local server and icon generator |
 

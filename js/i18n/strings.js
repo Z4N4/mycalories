@@ -189,10 +189,10 @@ const S = {
   tryAgain: ['وێنەکێ دی', 'صورة أخرى', 'Another photo'],
   notSure: ['نە پشتڕاستە', 'غير متأكد', 'not sure'],
   aiCheckNote: ['AI دشێت خەلەت بیت و ڕۆنێ ڤەشارتی نابینیت.', 'قد يخطئ الذكاء الاصطناعي ولا يرى الدهن المخفي.', 'AI can be wrong and can\'t see hidden oil.'],
-  aiNoKey: ['بۆ شلۆڤەکرنا وێنەیان، ئێک جار کلیلەکا Gemini یا بێ بەرامبەر ل ڕێکخستنان زێدە بکە.', 'لتحليل الصور، أضف مرة واحدة مفتاح Gemini مجاني في الإعدادات.', 'To analyze photos, add a free Gemini key in Settings (one time).'],
+  aiNoKey: ["بۆ شلۆڤەکرنا وێنەیان، ئێک جار کلیلەکا AI یا بێ بەرامبەر (Groq) ل ڕێکخستنان زێدە بکە.","لتحليل الصور، أضف مرة واحدة مفتاح ذكاء اصطناعي مجاني (Groq) في الإعدادات.","To analyze photos, add a free AI key (Groq) in Settings, one time."],
   openSettings: ['بچە ڕێکخستنان', 'افتح الإعدادات', 'Open Settings'],
   aiQuota: ['سنوورێ بێ بەرامبەر بۆ نوکە ب دوماهی هات. پشتی چەند خولەکان دووبارە بکە.', 'انتهى الحد المجاني حالياً. حاول بعد بضع دقائق.', 'The free limit is used up for now. Try again in a few minutes.'],
-  aiBadKey: ['کلیلا Gemini کار ناکەت. ل ڕێکخستنان کونترۆل بکە.', 'مفتاح Gemini لا يعمل. تحقق منه في الإعدادات.', 'The Gemini key doesn\'t work. Check it in Settings.'],
+  aiBadKey: ["کلیلا AI کار ناکەت. ل ڕێکخستنان کونترۆل بکە.","مفتاح الذكاء الاصطناعي لا يعمل. تحقق منه في الإعدادات.","The AI key doesn’t work. Check it in Settings."],
   aiFailed: ['شلۆڤەکرن سەرنەکەفت. وێنەکێ دی تاقی بکە.', 'تعذّر التحليل. جرّب صورة أخرى.', 'The analysis failed. Try another photo.'],
   imageUnreadable: ['ئەڤ وێنەیە نەهاتە ڤەکرن', 'تعذّر فتح هذه الصورة', 'This photo could not be opened'],
 
@@ -249,6 +249,31 @@ const S = {
   addAsWritten: ['وەک تە نڤیسی زێدە بکە', 'أضف كما كتبت', 'Add as written'],
   quickAdded: ['{n} خوارن هاتنە زێدەکرن ✓', 'تمت إضافة {n} أطعمة ✓', '{n} foods added ✓'],
 
+  // ---------- AI (Groq / Gemini) ----------
+  groqHowTo: ['1. ل console.groq.com/keys ب حسابێ Google بچە ژوور.  2. ل سەر «Create API Key» بدە.  3. کلیلێ کۆپی بکە و ل ڤێرە دانە. بێ بەرامبەر و گەلەک خێرایە.', '1. ادخل إلى console.groq.com/keys بحساب Google.  2. اضغط «Create API Key».  3. انسخ المفتاح والصقه هنا. مجاني وسريع جداً.', '1. Sign in at console.groq.com/keys with a Google account.  2. Tap "Create API Key".  3. Copy the key and paste it here. Free and very fast.'],
+  aiUses: ['AI بۆ وێنەیان، بۆ تێگەهشتنا نڤیسینێن زەحمەت و بۆ لێگەریانا ل سەر ئینتەرنێتێ دهێتە بکارئینان.', 'يُستخدم الذكاء الاصطناعي للصور، ولفهم الكتابة الصعبة، وللبحث على الإنترنت.', 'AI is used for photos, for understanding hard-to-read typing, and for searching online.'],
+  recommended: ['پێشنیارکری', 'مُوصى به', 'recommended'],
+  useGemini: ['یان Google Gemini بکاربینە', 'أو استخدم Google Gemini', 'Or use Google Gemini instead'],
+  aiReading: ['AI وان دێڕان دخوینیت یێن نەهاتینە فامکرن…', 'الذكاء الاصطناعي يقرأ الأسطر غير المفهومة…', 'AI is reading the lines that weren’t understood…'],
+  aiCouldHelp: ['ب کلیلەکا AI یا بێ بەرامبەر (Groq) ل ڕێکخستنان، ئەپ دشێت ڤان ژی بخوینیت.', 'مع مفتاح ذكاء اصطناعي مجاني (Groq) في الإعدادات، يمكن للتطبيق قراءة هذه أيضاً.', 'With a free AI key (Groq) in Settings, the app can read these too.'],
+
+  // ---------- Search online ----------
+  searchOnline: ['ل سەر ئینتەرنێتێ بگەڕێ', 'ابحث على الإنترنت', 'Search online'],
+  onlineProducts: ['بەرهەمێن پاکەتکری', 'منتجات معبأة', 'Packaged products'],
+  onlineAi: ['خەمڵاندنا AI', 'تقدير الذكاء الاصطناعي', 'AI estimate'],
+  onlineHint: ['هەر خوارن یان ڤەخوارنەکێ بنڤیسە، ب ناڤێ مارکێ ژی. یا تو هەلدبژێری دێ ل «خوارنێن من» هێتە پاشەکەفتکرن.', 'اكتب أي طعام أو مشروب، حتى باسم الماركة. ما تختاره يُحفظ في «أطعمتي».', 'Type any food or drink, brand names too. What you pick is saved to "My foods".'],
+  searchBusy: ['داتابەیس نوکە مژوولە. پشتی چەند چرکەیان دووبارە ل «بگەڕێ» بدە.', 'قاعدة البيانات مشغولة الآن. اضغط «بحث» مجدداً بعد ثوانٍ.', 'The product database is busy. Tap Find again in a few seconds.'],
+  savedToMyFoods: ['ل «خوارنێن من» هاتە پاشەکەفتکرن ✓', 'تم الحفظ في «أطعمتي» ✓', 'Saved to "My foods" ✓'],
+
+  // ---------- Saved meals ----------
+  myMeals: ['ژەمێن من', 'وجباتي', 'My meals'],
+  noMeals: ['هێشتا چ ژەم نەهاتینە پاشەکەفتکرن. ل «ئەڤرۆ» ل سەر 🔖 بدە ل ژەمەکێ دا پاشەکەفت بکەی.', 'لا توجد وجبات محفوظة بعد. في «اليوم» اضغط 🔖 على أي وجبة لحفظها.', 'No saved meals yet. On Today, tap 🔖 on a meal to save it.'],
+  saveMeal: ['ژەمی پاشەکەفت بکە', 'احفظ الوجبة', 'Save this meal'],
+  saveMealHint: ['جارا دی ب ئێک لێدان هەمی دێ هێنە زێدەکرن.', 'في المرة القادمة تُضاف كلها بلمسة واحدة.', 'Next time, add all of it with one tap.'],
+  mealName: ['ناڤێ ژەمی', 'اسم الوجبة', 'Meal name'],
+  mealSaved: ['ژەم هاتە پاشەکەفتکرن ✓', 'تم حفظ الوجبة ✓', 'Meal saved ✓'],
+  deleteMealConfirm: ['ئەڤی ژەمی ژێببەی؟', 'حذف هذه الوجبة المحفوظة؟', 'Delete this saved meal?'],
+
   // ---------- Photos ----------
   addPhoto: ['وێنەیێ خۆ زێدە بکە', 'أضف صورتك', 'Add your photo'],
   changePhoto: ['وێنەی بگوهۆڕە', 'غيّر الصورة', 'Change photo'],
@@ -277,13 +302,13 @@ const S = {
   photosPreparing: ['وێنە دهێنە ئامادەکرن… پشتی چەند چرکەیان دووبارە بکە.', 'جارٍ تجهيز الصور… حاول بعد ثوانٍ.', 'Getting your photos ready… try again in a few seconds.'],
 
   // ---------- AI settings ----------
-  aiSection: ['شلۆڤەکرنا وێنەیان (Gemini)', 'تحليل الصور (Gemini)', 'Photo analysis (Gemini)'],
+  aiSection: ["AI (وێنە، نڤیسین، ئینتەرنێت)","الذكاء الاصطناعي (صور، كتابة، إنترنت)","AI (photos, typing, online search)"],
   aiHowTo: ['1. ل aistudio.google.com/apikey ب حسابێ Google بچە ژوور.  2. ل سەر «Create API key» بدە.  3. کلیلێ کۆپی بکە و ل ڤێرە دانە. بێ بەرامبەرە.', '1. ادخل إلى aistudio.google.com/apikey بحساب Google.  2. اضغط «Create API key».  3. انسخ المفتاح والصقه هنا. مجاني.', '1. Sign in at aistudio.google.com/apikey with a Google account.  2. Tap "Create API key".  3. Copy the key and paste it here. It\'s free.'],
   getKey: ['کلیلەکێ وەربگرە', 'احصل على مفتاح', 'Get a key'],
   aiKey: ['کلیلا API', 'مفتاح API', 'API key'],
   aiKeySaved: ['کلیل کار دکەت و هاتە پاشەکەفتکرن ✓', 'المفتاح يعمل وتم حفظه ✓', 'The key works and is saved ✓'],
   aiKeyRemoved: ['کلیل هاتە ژێبرن', 'تم حذف المفتاح', 'Key removed'],
-  aiKeyInvalid: ['Google ئەڤ کلیلە قەبویل نەکر. دیسا کۆپی بکە یان کلیلەکا نوو دروست بکە.', 'رفضت Google هذا المفتاح. انسخه مجدداً أو أنشئ مفتاحاً جديداً.', 'Google rejected this key. Copy it again, or create a new key.'],
+  aiKeyInvalid: ["ئەڤ کلیلە نەهاتە قەبویلکرن. دیسا هەمیێ کۆپی بکە، یان کلیلەکا نوو دروست بکە.","تم رفض هذا المفتاح. انسخه كاملاً مرة أخرى أو أنشئ مفتاحاً جديداً.","This key was rejected. Copy the whole key again, or create a new one."],
   aiKeyTooShort: ['ئەڤە وەک کلیلەکا تمام دیار نابیت. هەمی کلیلێ کۆپی بکە.', 'لا يبدو هذا مفتاحاً كاملاً. انسخ المفتاح بالكامل.', 'That doesn\'t look like a complete key. Copy the whole key.'],
   aiKeyChecking: ['کلیل دهێتە تاقیکرن…', 'جارٍ فحص المفتاح…', 'Checking the key…'],
   aiKeyFailed: ['نەشیا کلیلێ تاقی بکەت. پشتی دەمەکی دووبارە بکە.', 'تعذّر فحص المفتاح. حاول بعد قليل.', 'Couldn\'t check the key. Try again in a moment.'],
@@ -291,7 +316,7 @@ const S = {
   aiKeyPlaceholder: ['کلیلێ ل ڤێرە دانە', 'الصق المفتاح هنا', 'Paste the key here'],
   aiKeySet: ['کلیل هاتیە دانان ✓', 'المفتاح مضاف ✓', 'Key is set ✓'],
   removeKey: ['کلیلێ ژێببە', 'احذف المفتاح', 'Remove key'],
-  aiPrivacy: ['وێنە بۆ شلۆڤەکرنێ دچنە Google. د پلانا بێ بەرامبەر دا Google دشێت وان بۆ باشترکرنا بەرهەمێن خۆ بکاربینیت، لەوما تنێ وێنەیێن خوارنێ بگرە. کلیل تنێ ل سەر ڤێ مۆبایلێ دمینیت.', 'تُرسل الصور إلى Google للتحليل. في الخطة المجانية قد تستخدمها Google لتحسين منتجاتها، لذا صوّر الطعام فقط. يبقى المفتاح على هذا الهاتف فقط.', 'Photos are sent to Google for analysis. On the free plan Google may use them to improve its products, so photograph only food. The key stays only on this phone.'],
+  aiPrivacy: ["وێنە و نڤیسینێن نەهاتینە فامکرن بۆ شلۆڤەکرنێ دچنە خزمەتگوزاریا AI (Groq یان Google). تنێ وێنەیێن خوارنێ بگرە. کلیل تنێ ل سەر ڤێ مۆبایلێ دمینیت.","تُرسل الصور والنصوص غير المفهومة إلى خدمة الذكاء الاصطناعي (Groq أو Google) للتحليل. صوّر الطعام فقط. يبقى المفتاح على هذا الهاتف فقط.","Photos and lines that weren’t understood are sent to the AI service (Groq or Google) for analysis. Photograph only food. The key stays only on this phone."],
 
   installHint: ['بۆ دانانێ ل سەر شاشێ: ل Safari ل سەر ⬆️ بدە پاشی «Add to Home Screen».', 'للتثبيت: في Safari اضغط ⬆️ ثم «Add to Home Screen».', 'To install: in Safari tap ⬆️ then "Add to Home Screen".'],
 };

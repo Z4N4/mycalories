@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { splitItems, parseItem, parseQuickEntry, looksLikeQuickEntry, resolveAmount } from '../js/core/quickEntry.js';
+import { splitItems, parseItem, parseQuickEntry, looksLikeQuickEntry, resolveAmount, detectMeal, suggestFoods } from '../js/core/quickEntry.js';
 import { buildFoods } from '../js/foods/index.js';
 import { normalize } from '../js/core/search.js';
 import { createInitialState } from '../js/core/store.js';
@@ -139,4 +139,65 @@ test('mixed fractions, litres and capped amounts', () => {
   const [huge] = pick('1000000 samoon');
   assert.ok(huge.qty <= 50, `qty ${huge.qty}`);
   assert.equal(pick('7up')[0].id, 'soda_lemon');
+});
+
+test('no commas needed: a new number starts a new food', () => {
+  assert.deepEqual(pick('2 samoon 1 tea').map((i) => i.id), ['samoon', 'tea_sugar']);
+  assert.deepEqual(pick('200g rice 100g chicken breast').map((i) => i.id), ['timman', 'chicken_breast']);
+  assert.equal(pick('rice 200g').length, 1); // amount after the food is still one item
+  assert.deepEqual(pick('1 1/2 plate dolma').map((i) => i.qty), [1.5]);
+});
+
+test('chatty words are ignored in all three languages', () => {
+  assert.deepEqual(pick('I ate 2 samoon and had a tea today').map((i) => i.id), ['samoon', 'tea_sugar']);
+  assert.deepEqual(pick('أكلت صحن تمن وشربت استكان چاي').map((i) => i.id), ['timman', 'tea_sugar']);
+  assert.deepEqual(pick('من دوو هێک خوارن').map((i) => i.id), ['egg_boiled']);
+});
+
+test('small typos still find the food', () => {
+  assert.equal(pick('200g chiken breast')[0].id, 'chicken_breast');
+  assert.equal(pick('2 samon')[0].id, 'samoon');
+  assert.equal(pick('biriyani')[0].id.startsWith('biryani'), true);
+  assert.equal(pick('دولمه')[0].id, 'dolma');
+});
+
+test('meal words pick the meal', () => {
+  assert.equal(detectMeal('for breakfast I had 2 eggs'), 'breakfast');
+  assert.equal(detectMeal('غداء: صحن تمن'), 'lunch');
+  assert.equal(detectMeal('شیڤ: کەباب'), 'dinner');
+  assert.equal(detectMeal('2 samoon'), null);
+});
+
+test('suggestions for the word being typed', () => {
+  const s = suggestFoods(foods, '200g ric').map((f) => f.id);
+  assert.ok(s.includes('timman'), s.join(' '));
+  assert.equal(suggestFoods(foods, '200g ').length, 0);
+});
+
+test('suggestions for a two-word name do not jump to an everyday word', () => {
+  const s = suggestFoods(foods, 'for lunch I ate 200g chiken bre').map((f) => f.id);
+  assert.equal(s[0], 'chicken_breast');
+});
+
+test('amounts written after the food are split correctly', () => {
+  assert.deepEqual(pick('rice 200g chicken 100g').map((i) => [i.id, i.grams]), [['timman', 200], ['grilled_chicken', 100]]);
+  assert.deepEqual(pick('eggs 3 tea 1').map((i) => [i.id, i.qty]), [['egg_boiled', 3], ['tea_sugar', 1]]);
+  assert.deepEqual(pick('1 can pepsi 330 ml').map((i) => i.id), ['pepsi']);
+  assert.deepEqual(pick('kubba 2 pieces').map((i) => [i.id, i.qty]), [['kubba_halab', 2]]);
+  assert.equal(pick('برنج 200 غرام مریشک 100 غرام').length, 2);
+});
+
+test('fuzzy guesses are marked weak so the AI can check them', () => {
+  assert.equal(pick('coke')[0].id, 'cola'); // an everyday word, not "cake"
+  const [cak] = parseQuickEntry('kake', foods);
+  assert.ok(!cak.food || cak.weak);
+  const [beer] = parseQuickEntry('beer', foods);
+  assert.ok(!beer.food || beer.weak, `beer → ${beer.food?.id}`);
+  assert.equal(parseQuickEntry('2 samon', foods)[0].weak, true);
+  assert.equal(parseQuickEntry('2 samoon', foods)[0].weak, false);
+});
+
+test('the drink sharbat is not removed as "I drank"', () => {
+  assert.equal(pick('شربت زبيب')[0].id, 'zbeeb');
+  assert.deepEqual(pick('أكلت صحن تمن وشربت استكان چاي').map((i) => i.id), ['timman', 'tea_sugar']);
 });

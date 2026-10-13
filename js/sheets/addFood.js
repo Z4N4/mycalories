@@ -14,6 +14,8 @@ import { openCustomFood } from './customFood.js';
 import { openBarcodeScanner } from './barcodeScanner.js';
 import { openPhotoFood } from './photoFood.js';
 import { openQuickEntry } from './quickEntry.js';
+import { openOnlineSearch } from './onlineSearch.js';
+import { savedMealRows } from './savedMeals.js';
 import { looksLikeQuickEntry } from '../core/quickEntry.js';
 
 const MAX_SEARCH_RESULTS = 80;
@@ -64,6 +66,7 @@ export function openAddFood(app, dateKey, meal) {
   const filters = [
     { id: 'recent', label: t('recent') },
     { id: 'favorites', label: `⭐ ${t('favorites')}` },
+    { id: 'meals', label: `🍽️ ${t('myMeals')}` },
     { id: 'mine', label: t('myFoods') },
     { id: 'all', label: t('all') },
     ...CATEGORIES.map((c) => ({ id: `cat:${c}`, label: CATEGORY_NAMES[c][lang] })),
@@ -81,6 +84,11 @@ export function openAddFood(app, dateKey, meal) {
   }
 
   function renderList() {
+    if (filter === 'meals' && !query.trim()) {
+      const rows = savedMealRows(app, { dateKey, meal, onChange: refresh });
+      listEl.replaceChildren(...(rows.length ? rows : [h('p', { class: 'empty' }, t('noMeals'))]));
+      return;
+    }
     const foods = foodsFor(app, filter, query);
     const create = h('button', {
       class: 'food-row create',
@@ -93,9 +101,17 @@ export function openAddFood(app, dateKey, meal) {
     }, h('span', { class: 'thumb md emoji' }, '✍️'),
     h('span', { class: 'food-text' }, h('span', { class: 'food-name' }, t('addAsWritten')), h('span', { class: 'food-sub' }, '“', h('bdi', { dir: 'auto' }, query.trim()), '”')),
     h('span', { class: 'food-add' }, icon('next', 'flip')));
+    // Not in the app? Look for it online (any food or drink in the world).
+    const online = query.trim().length >= 2 && !asWritten && h('button', {
+      class: 'food-row quick-suggest',
+      onClick: () => openOnlineSearch(app, { query: query.trim(), dateKey, meal, onChange: refresh }),
+    }, h('span', { class: 'thumb md emoji' }, '🌐'),
+    h('span', { class: 'food-text' }, h('span', { class: 'food-name' }, t('searchOnline')), h('span', { class: 'food-sub' }, '“', h('bdi', { dir: 'auto' }, query.trim()), '”')),
+    h('span', { class: 'food-add' }, icon('search')));
     listEl.replaceChildren(
       asWritten || '',
-      ...(foods.length ? foods.map((f) => foodRow(app, f, pick)) : (asWritten ? [] : [h('p', { class: 'empty' }, emptyText(t, filter, query))])),
+      ...(foods.length ? foods.map((f) => foodRow(app, f, pick)) : (asWritten || online ? [] : [h('p', { class: 'empty' }, emptyText(t, filter, query))])),
+      online || '',
       (filter === 'mine' || query || !foods.length) ? create : '',
     );
   }

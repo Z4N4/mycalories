@@ -7,7 +7,9 @@ import { openSheet } from '../ui/sheet.js';
 import { segmented } from '../ui/controls.js';
 import { foodThumb } from '../ui/foodThumb.js';
 import { unitName } from '../ui/labels.js';
-import { parseQuickEntry, resolveAmount } from '../core/quickEntry.js';
+import { parseQuickEntry, resolveAmount, detectMeal, suggestFoods, splitItems, parseItem } from '../core/quickEntry.js';
+import { normalize } from '../core/search.js';
+import { understandLines, aiAvailable } from '../services/ai.js';
 import { searchFoods } from '../core/search.js';
 import { MEALS, addEntry } from '../core/store.js';
 import { foodName } from '../foods/index.js';
@@ -47,22 +49,72 @@ export function openQuickEntry(app, { dateKey, meal: startMeal, text = '', onCha
   let meal = startMeal;
   let written = text;
   let items = [];
+  let aiState = 'idle'; // 'idle' | 'working' | 'done' | error code
+  let aiDetail = '';
+  let aiRun = 0; // an AI answer for older text is ignored
+  let view = 'write';
+  // Foods picked from the suggestions while typing (full name → food): that name always means that food.
+  const picked = new Map();
+  const pickedFor = (text) => {
+    const words = ` ${normalize(text)} `;
+    return [...picked].find(([name]) => words.includes(` ${name} `))?.[1];
+  };
 
-  const sheet = openSheet({ title: t('quickTitle'), closeLabel: t('close'), tall: true, body: h('div') });
+  const sheet = openSheet({ title: t('quickTitle'), closeLabel: t('close'), tall: true, body: h('div'), onClose: () => { view = 'closed'; } });
+
+  /** Read the text, honour foods picked from suggestions, and pick the meal from words like "lunch". */
+  function understand() {
+    items = parseQuickEntry(written, app.d.foods).map((it) => {
+      const chosen = pickedFor(it.text);
+      const base = chosen
+        ? { ...it, food: chosen, weak: false, candidates: [chosen, ...it.candidates.filter((c) => c !== chosen)], ...resolveAmount(chosen, it.typedUnit, it.typedQty) }
+        : it;
+      return { ...base, on: true };
+    });
+    meal = detectMeal(written) ?? meal;
+    aiState = 'idle';
+    aiRun += 1;
+  }
 
   // ---------- step 1: write ----------
   function writeView() {
+    view = 'write';
+    aiRun += 1;
     const box = h('textarea', { class: 'input quick-box', maxlength: MAX_TEXT, placeholder: t('quickPlaceholder') }, written);
+    const suggestions = h('div', { class: 'chips scroll-x quick-suggestions' });
     const go = () => {
       written = box.value.trim();
       if (!written) { box.focus(); return; }
-      items = parseQuickEntry(written, app.d.foods).map((it) => ({ ...it, on: true }));
+      understand();
       reviewView();
     };
+    // Suggestions for the word being typed; tapping one completes it.
+    const suggest = () => {
+      const found = suggestFoods(app.d.foods, box.value);
+      suggestions.replaceChildren(...found.map((food) => {
+        const shortName = foodName(food, lang).split(/[(,،/]/)[0].trim();
+        return h('button', {
+          class: 'chip-btn suggest-chip',
+          onClick: () => {
+            // Replace the typed food words at the end ("200g chiken bre" → "200g Grilled chicken").
+            const typed = new Set(parseItem(splitItems(box.value).pop() ?? '').query.split(' ').filter(Boolean));
+            const tokens = box.value.trimEnd().split(/\s+/);
+            let keep = tokens.length;
+            while (keep > 0 && typed.has(normalize(tokens[keep - 1]))) keep -= 1;
+            box.value = `${tokens.slice(0, keep).join(' ')} ${shortName} `.trimStart();
+            picked.set(normalize(shortName), food);
+            suggestions.replaceChildren();
+            box.focus();
+          },
+        }, foodThumb(food, 'sm'), shortName);
+      }));
+    };
+    box.addEventListener('input', suggest);
     box.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); go(); } });
     sheet.setBody(h('div', { class: 'stack' },
       h('p', { class: 'muted small' }, t('quickHint')),
       box,
+      suggestions,
       h('div', { class: 'chips wrap quick-examples' },
         [t('quickEx1'), t('quickEx2'), t('quickEx3')].map((ex) => h('button', {
           class: 'chip-btn small', onClick: () => { box.value = box.value ? `${box.value}, ${ex}` : ex; box.focus(); },
@@ -121,7 +173,7 @@ export function openQuickEntry(app, { dateKey, meal: startMeal, text = '', onCha
       query: item.food ? '' : item.query,
       onPick: (food) => {
         // What was typed (e.g. "1" with no unit) is applied to the chosen food's own portion.
-        update(item.key, { food, ...resolveAmount(food, item.typedUnit, item.typedQty) });
+        update(item.key, { food, weak: false, ...resolveAmount(food, item.typedUnit, item.typedQty) });
         el.replaceWith(row(items.find((it) => it.key === item.key)));
         renderTotal();
       },
@@ -141,8 +193,9 @@ export function openQuickEntry(app, { dateKey, meal: startMeal, text = '', onCha
     el.append(
       foodThumb(item.food, 'sm'),
       h('div', { class: 'ai-main' },
-        h('button', { class: 'quick-food', onClick: choose }, h('span', null, foodName(item.food, lang)), icon('edit')),
-        h('span', { class: 'quick-typed' }, '“', h('bdi', { dir: 'auto' }, item.text), '”'),
+        h('button', { class: 'quick-food', onClick: choose }, h('span', null, foodName(item.food, lang)), item.fromAi ? h('span', { class: 'badge' }, '✨ AI') : '', icon('edit')),
+        h('span', { class: 'quick-typed' }, '“', h('bdi', { dir: 'auto' }, item.text), '”',
+          item.weak ? h('span', { class: 'field-error' }, ` · ${t('notSure')}`) : ''),
         h('div', { class: 'ai-controls' }, amountControls(item, refreshKcal), kcalEl)),
       remove);
     refreshKcal();
@@ -172,22 +225,76 @@ export function openQuickEntry(app, { dateKey, meal: startMeal, text = '', onCha
     onChange?.();
   });
 
+  const needsAi = (it) => !it.food || it.weak;
+
+  /**
+   * Lines the app couldn't read, or only guessed from a typo, go to the AI
+   * (only those; everything else stays offline).
+   */
+  async function askAiForMissing() {
+    const missing = items.filter(needsAi);
+    if (!missing.length || !aiAvailable() || !navigator.onLine || aiState !== 'idle') return;
+    aiState = 'working';
+    const mine = aiRun;
+    reviewView();
+    try {
+      const found = await understandLines(missing.map((it) => it.text), app.d.foods);
+      if (mine !== aiRun || view !== 'review') return; // the text was changed meanwhile
+      const byLine = new Map();
+      found.forEach((r) => {
+        const line = r.line && r.line <= missing.length ? r.line : (missing.length === 1 ? 1 : null);
+        if (line) byLine.set(line, [...(byLine.get(line) ?? []), r]);
+      });
+      const lineOf = new Map(missing.map((it, i) => [it.key, i + 1]));
+      items = items.flatMap((it) => {
+        // Lines fixed by hand while the AI was working keep the user's choice.
+        const answers = needsAi(it) ? byLine.get(lineOf.get(it.key)) : null;
+        if (!answers) return [it];
+        return answers.map((r, k) => ({
+          ...it, key: `${it.key}ai${k}`, food: r.food, weak: false, fromAi: true,
+          candidates: [r.food, r.alternative, ...it.candidates].filter((c, i, all) => c && all.indexOf(c) === i),
+          typedUnit: 'g', typedQty: r.grams, ...resolveAmount(r.food, 'g', r.grams),
+        }));
+      });
+      aiState = 'done';
+    } catch (err) {
+      if (mine !== aiRun || view !== 'review') return;
+      aiState = err?.code ?? 'failed';
+      aiDetail = err?.detail ?? '';
+    }
+    reviewView();
+  }
+
+  function aiStatus() {
+    if (aiState === 'working') return h('div', { class: 'analyzing' }, h('span', { class: 'spinner' }), t('aiReading'));
+    if (aiState === 'idle' || aiState === 'done') return '';
+    const key = { quota: 'aiQuota', badKey: 'aiBadKey', offline: 'offline', noKey: 'aiNoKey' }[aiState] ?? 'aiFailed';
+    return h('div', { class: 'stack' },
+      h('p', { class: 'field-error' }, t(key)),
+      aiDetail ? h('p', { class: 'muted small detail-text', dir: 'ltr' }, aiDetail) : '');
+  }
+
   function reviewView() {
     if (!items.length) { writeView(); return; }
+    view = 'review';
     const found = items.filter((it) => it.food).length;
     sheet.setBody(h('div', { class: 'stack' },
       h('p', { class: 'muted small' }, found ? t('quickReview') : t('quickNothing')),
+      aiStatus(),
       h('div', { class: 'quick-list' }, items.map(row)),
+      items.some(needsAi) && !aiAvailable() ? h('p', { class: 'note' }, icon('sparkle'), t('aiCouldHelp')) : '',
       h('div', { class: 'field' },
         h('span', { class: 'field-label' }, t('meal')),
         segmented(MEALS.map((m) => ({ value: m, label: MEAL_NAMES[m][lang] })), meal, (m) => { meal = m; }, 'meals-seg')),
       h('button', { class: 'link-btn', onClick: writeView }, icon('edit'), t('editText'))));
     sheet.setFooter(h('div', { class: 'footer-row' }, addBtn));
     renderTotal();
+    askAiForMissing();
   }
 
   if (text.trim()) {
-    items = parseQuickEntry(text, app.d.foods).map((it) => ({ ...it, on: true }));
+    written = text.trim();
+    understand();
     reviewView();
   } else {
     writeView();

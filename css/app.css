@@ -550,6 +550,19 @@ body.cam-open { overflow: hidden; }
 .food-row.quick-suggest { background: var(--accent-soft); }
 .food-row.quick-suggest .food-name { color: var(--accent); }
 
+/* ---------- Suggestions, online search, saved meals ---------- */
+.quick-suggestions:empty { display: none; }
+.suggest-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px 4px 4px; background: var(--accent-soft); color: var(--accent); }
+[dir="rtl"] .suggest-chip { padding: 4px 4px 4px 12px; }
+.suggest-chip .thumb.sm { width: 28px; height: 28px; font-size: 16px; border-radius: 9px; }
+.search-wrap.grow { flex: 1; }
+.food-row.static { cursor: default; }
+.food-row.saved-meal { padding: 0; gap: 0; }
+.saved-meal-main { flex: 1; display: flex; align-items: center; gap: 12px; padding: 12px 14px; text-align: start; min-width: 0; }
+.saved-meal-main:active { background: var(--surface-2); }
+.saved-meal .icon-btn { margin-inline-end: 6px; }
+.saved-meal .food-sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 /* ---------- Small phones ---------- */
 @media (max-width: 370px) {
   .summary { grid-template-columns: 1fr; justify-items: center; }

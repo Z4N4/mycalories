@@ -10,6 +10,7 @@ const MAX_CANDIDATES = 6;
 const MAX_GRAMS = 5000;
 const MAX_PORTIONS = 50;
 const ALIAS_SCORE = 99; // beats partial matches, but not a food's exact full name
+export const WEAK_SCORE = 20; // at or below: only a spelling guess ("samon" → samoon), worth a second look
 
 // ---------- words ----------
 
@@ -75,9 +76,23 @@ const ALIASES = {
   cheese_white: 'cheese جبن جبنة پەنیر',
   kebab: 'kebab kabab كباب کەباب',
   soda_lemon: 'sevenup sprite سڤن',
+  cola: 'coke cola كولا كوكا کۆلا',
 };
 
-const FILLER = new Set(['of', 'x', 'من', 'ژ'].map(normalize));
+// Chatty words people write around the food ("I ate … today", "أكلت", "خوارم").
+const FILLER = new Set([
+  'of x i ate eat eaten had have has drank drink drunk today yesterday some about around approx approximately my the also then just for at in',
+  'من ژ أكلت اكلت اكلنا شربت تناولت اليوم امس البارحة حوالي تقريبا بعض على في',
+  'خوار خوارن خوارم خواری ڤەخوار ڤەخوارن ڤەخوارم ئەڤرۆ دوهی نێزیکی بۆ ل',
+].join(' ').split(' ').map(normalize));
+
+// Meal words: also removed from the food name, and used to pick the meal.
+const MEAL_WORDS = {
+  breakfast: 'breakfast فطور الفطور ريوك تێشت تیشت',
+  lunch: 'lunch غداء الغداء غدا فراڤین',
+  dinner: 'dinner supper عشاء العشاء شیڤ',
+  snacks: 'snack snacks سناك سناكات سڤکاهی',
+};
 
 const wordMap = (table, toValue = (k) => k) => {
   const map = new Map();
@@ -106,6 +121,14 @@ const PHRASES = (() => {
   return list;
 })();
 const ALIAS_MAP = wordMap(ALIASES);
+const MEALS_BY_WORD = wordMap(MEAL_WORDS);
+
+/** "for breakfast I had…" / "غداء: …" / "شیڤ: …" → that meal, or null. */
+export function detectMeal(text) {
+  const words = normalize(text).split(' ');
+  for (const w of words) if (MEALS_BY_WORD.has(w)) return MEALS_BY_WORD.get(w);
+  return null;
+}
 const aliasFor = (query) => ALIAS_MAP.get(query) ?? ALIAS_MAP.get(query.split(' ').map((w) => (w.length > 3 ? w.replace(/(هک|ات|ه|ا|ی|es|s)$/u, '') : w)).join(' '));
 
 // ---------- splitting & reading one item ----------
@@ -118,9 +141,67 @@ const westernDigits = (text) => String(text ?? '')
   .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660))
   .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x06F0));
 
+/** Numbers made ready before splitting: "1 1/2" → "1.5", "1,5" → "1.5", "1,000" → "1000". */
+const numbersFirst = (text) => westernDigits(text)
+  .replace(/(\d),(\d{3})(?!\d)/g, '$1$2')
+  .replace(/(\d)[٫,](\d)/g, '$1.$2')
+  .replace(/(\d+)\s+(\d+)\/(\d+)/g, (_, w, a, b) => String(Number(w) + Number(a) / Number(b)));
+
+// Arabic joins "and" to the next verb: "وشربت" = "and I drank".
+const ATTACHED_AND = /\sو(?=شربت|اكلت|أكلت|تناولت)/g;
+
+const JOIN_WORDS = new Set(['with', 'مع', 'ب'].map(normalize));
+
+/** 'number' | 'unit' | 'filler' | 'word' for one typed word. */
+function kindOf(w) {
+  const n = normalize(w);
+  if (['a', 'an'].includes(n) || FILLER.has(n) || JOIN_WORDS.has(n) || !n) return 'filler';
+  if (/^\d/.test(w) || NUMBERS.has(n)) return 'number';
+  if (UNITS.has(n) || (n.endsWith('s') && UNITS.has(n.slice(0, -1)))) return 'unit';
+  return 'word';
+}
+
+/**
+ * Without commas, amounts show where one food ends and the next begins:
+ * "2 samoon 1 tea" (amount first) and "rice 200g chicken 100g" (amount after).
+ * "rice 200g" and "1 can pepsi 330 ml" stay one item.
+ */
+function splitOnNumbers(chunk) {
+  const parts = [];
+  let current = [];
+  let hasNumber = false;
+  let hasWord = false;
+  let wordFirst = null; // did this part start with the food name?
+  let last = null;
+  for (const w of chunk.split(/\s+/).filter(Boolean)) {
+    const kind = kindOf(w);
+    const newAmount = kind === 'number' && hasNumber && hasWord;
+    const newFood = kind === 'word' && wordFirst && hasNumber && (last === 'number' || last === 'unit');
+    if (newAmount || newFood) {
+      parts.push(current);
+      current = [];
+      hasNumber = false;
+      hasWord = false;
+      wordFirst = null;
+    }
+    if (kind === 'number') { hasNumber = true; wordFirst ??= false; }
+    if (kind === 'word') { hasWord = true; wordFirst ??= true; }
+    current.push(w);
+    last = kind;
+  }
+  if (current.length) parts.push(current);
+  // A part with no food word ("330 ml") belongs to the food before it.
+  return parts.reduce((out, words) => {
+    if (out.length && !words.some((w) => kindOf(w) === 'word')) return [...out.slice(0, -1), [...out[out.length - 1], ...words]];
+    return [...out, words];
+  }, []).map((words) => words.join(' '));
+}
+
 export function splitItems(text) {
   // Digits first, so "١,٥" is seen as a number before commas split the text.
-  return westernDigits(text).split(SPLIT).map((s) => s.trim()).filter(Boolean);
+  return numbersFirst(text).replace(ATTACHED_AND, ' و ').split(SPLIT)
+    .map((s) => s.trim()).filter(Boolean)
+    .flatMap(splitOnNumbers);
 }
 
 const FRACTIONS = { '½': 0.5, '¼': 0.25, '¾': 0.75 };
@@ -128,7 +209,7 @@ const FRACTIONS = { '½': 0.5, '¼': 0.25, '¾': 0.75 };
 /** Western digits, dot decimals, and a space between a number and its unit ("200g" → "200 g"). */
 function prepare(text) {
   return text
-    .replace(/7s?up/gi, 'sevenup') // the drink, not "7 × up"
+    .replace(/7\s?up/gi, 'sevenup') // the drink, not "7 × up"
     .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660))
     .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x06F0))
     .replace(/(\d),(\d{3})(?!\d)/g, '$1$2') // 1,000 → 1000
@@ -147,7 +228,7 @@ const isNumeric = (w) => /^\d+(\.\d+)?$/.test(w);
  * One item → { qty, unit, query }. unit is 'g' for grams/kg/ml (qty in grams),
  * a portion unit (plate, piece…) or null when only a count was given.
  */
-export function parseItem(chunk, { keepUnit = false } = {}) {
+export function parseItem(chunk, { keepUnit = false, keepFiller = false } = {}) {
   const words = prepare(chunk).split(/\s+/).filter(Boolean);
   const norm = words.map((w) => (isNumeric(w) ? w : normalize(w))).filter(Boolean); // "&" etc. become nothing
   const used = new Set();
@@ -178,7 +259,9 @@ export function parseItem(chunk, { keepUnit = false } = {}) {
   if (unit === 'kg' || unit === 'l') { unit = 'g'; qty = (qty ?? 1) * 1000; }
   if (unit === 'ml') unit = 'g';
   if (unit && qty === null) qty = 1;
-  const query = norm.filter((w, i) => !used.has(i) && !FILLER.has(w)).join(' ');
+  // A second amount ("1 can pepsi 330 ml") only repeats the first one.
+  const extraAmount = (w) => isNumeric(w) || (unit && !keepUnit && (UNITS.has(w) || (w.endsWith('s') && UNITS.has(w.slice(0, -1)))));
+  const query = norm.filter((w, i) => !used.has(i) && !extraAmount(w) && (keepFiller || !FILLER.has(w)) && !MEALS_BY_WORD.has(w)).join(' ');
   return { qty, unit, query };
 }
 
@@ -216,9 +299,58 @@ function score(food, qWords, q) {
     }
   }
   if (!best && prefixMatch(qWords, keys)) best = 40;
+  if (!best) {
+    // Small typos ("chiken", "samon", "biriyani"): every word must be close to a word of the name.
+    for (const words of names) {
+      if (fuzzyMatch(qWords, words)) best = Math.max(best, 10 + 10 * Math.min(1, qWords.length / words.length));
+    }
+  }
   return best;
 }
 
+/** Edit distance between two short words (insert / delete / replace one letter = 1). */
+function distance(a, b) {
+  if (Math.abs(a.length - b.length) > 2) return 3;
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i += 1) {
+    const row = [i];
+    for (let j = 1; j <= b.length; j += 1) {
+      row[j] = Math.min(prev[j] + 1, row[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    prev = row;
+  }
+  return prev[b.length];
+}
+
+/** Allowed typos: none for very short words, 1 for 4–6 letters, 2 for longer words. */
+const typoLimit = (w) => (w.length < 4 ? 0 : w.length < 7 ? 1 : 2);
+
+// The first letter must be right: "coke" is not "cake", "beer" is not "beef"… but those still slip
+// through, which is why a typo match is only ever a guess (WEAK_SCORE) for the user or the AI to check.
+const fuzzyMatch = (qWords, words) => qWords.every((q) => words.some((w) => (
+  w.startsWith(q) || (typoLimit(q) > 0 && w[0] === q[0]
+    && (distance(q, w) <= typoLimit(q) || distance(q, w.slice(0, q.length + 1)) <= typoLimit(q) - 1))
+)));
+
+/**
+ * Suggestions for the word being typed at the end of the text ("200g ric" →
+ * rice dishes, everyday "rice" first).
+ */
+export function suggestFoods(foods, text, limit = 5) {
+  const last = splitItems(text).pop() ?? '';
+  if (/\s$/.test(text) || !last) return [];
+  const query = parseItem(last).query;
+  if (query.replace(/\s/g, '').length < 2) return [];
+  // Everyday-word shortcuts ("ric" → rice) only for a single word; "chiken bre" is a food name.
+  const single = !query.includes(' ');
+  const aliasIds = single ? [...ALIAS_MAP.entries()].filter(([word]) => word.startsWith(query)).map(([, id]) => id) : [];
+  const byId = new Map(foods.map((f) => [f.id, f]));
+  const fromAlias = [...new Set(aliasIds)].map((id) => byId.get(id)).filter(Boolean);
+  const found = findFoods(foods, query);
+  return [...new Set([...fromAlias, ...found])].slice(0, limit);
+}
+
+/** Foods with their scores, best first. */
 function rank(foods, query) {
   const qWords = query.split(' ').filter(Boolean);
   if (!qWords.length) return [];
@@ -226,24 +358,28 @@ function rank(foods, query) {
   return foods
     .map((food, i) => ({ food, i, s: food.id === aliasId ? Math.max(ALIAS_SCORE, score(food, qWords, query)) : score(food, qWords, query) }))
     .filter((r) => r.s > 0)
-    .sort((a, b) => b.s - a.s || a.i - b.i)
-    .map((r) => r.food);
+    .sort((a, b) => b.s - a.s || a.i - b.i);
 }
 
-/** Score of the best match for a query (0 = nothing). */
-function bestScore(foods, query) {
-  const qWords = query.split(' ').filter(Boolean);
-  if (!qWords.length) return 0;
-  const aliasId = aliasFor(query);
-  return foods.reduce((best, food) => Math.max(best, food.id === aliasId ? ALIAS_SCORE : score(food, qWords, query)), 0);
-}
-
-/** Find foods for a query, trying a singular form for English plurals ("eggs" → "egg"). */
-export function findFoods(foods, query) {
+/** Ranked matches, trying a singular form for English plurals ("eggs" → "egg"). */
+function scored(foods, query) {
   const direct = rank(foods, query);
   if (direct.length) return direct.slice(0, MAX_CANDIDATES);
   const singular = query.split(' ').map((w) => w.replace(/(es|s)$/, '')).join(' ');
   return singular !== query ? rank(foods, singular).slice(0, MAX_CANDIDATES) : [];
+}
+
+/** Score of the best match for a query (0 = nothing). */
+const bestScore = (foods, query) => scored(foods, query)[0]?.s ?? 0;
+
+/** The single best food for a name, with its score (100 = exact name, 99 = everyday word, ≤ WEAK_SCORE = a typo guess). */
+export function bestMatch(foods, query) {
+  const [top] = scored(foods, normalize(String(query ?? '').replace(/['’]/g, '')));
+  return top ? { food: top.food, score: top.s } : { food: null, score: 0 };
+}
+
+export function findFoods(foods, query) {
+  return scored(foods, query).map((r) => r.food);
 }
 
 /**
@@ -295,7 +431,8 @@ function rejoin(chunks, foods) {
   const out = [];
   for (let i = 0; i < chunks.length; i += 1) {
     const next = chunks[i + 1];
-    const joined = next && JOINERS.map((j) => chunks[i] + j + next).find((c) => isExactName(foods, parseItem(c).query));
+    // Its own amount ("200g rice and 100g chicken") makes the second part a separate food.
+    const joined = next && parseItem(next).qty === null && JOINERS.map((j) => chunks[i] + j + next).find((c) => isExactName(foods, parseItem(c).query));
     if (joined) { out.push(joined); i += 1; } else out.push(chunks[i]);
   }
   return out;
@@ -303,7 +440,8 @@ function rejoin(chunks, foods) {
 
 /** "chicken sandwich": keep "sandwich" in the name when that matches a food better than as a unit. */
 function readItem(chunk, foods) {
-  const parsed = parseItem(chunk);
+  const withFiller = parseItem(chunk, { keepFiller: true });
+  const parsed = isExactName(foods, withFiller.query) ? withFiller : parseItem(chunk);
   if (!parsed.unit || parsed.unit === 'g') return parsed;
   const whole = parseItem(chunk, { keepUnit: true });
   return bestScore(foods, whole.query) > bestScore(foods, parsed.query) ? whole : parsed;
@@ -314,7 +452,9 @@ export function parseQuickEntry(text, foods) {
     const parsed = readItem(chunk, foods);
     const candidates = preferUnit(findFoods(foods, parsed.query), parsed.unit);
     const food = candidates[0] ?? null;
-    const base = { key: `q${index}`, text: chunk, query: parsed.query, food, candidates, typedUnit: parsed.unit, typedQty: parsed.qty };
+    // A spelling guess is kept (forgiving typing) but marked, so the AI or the user checks it.
+    const weak = Boolean(food) && bestScore(foods, parsed.query) <= WEAK_SCORE;
+    const base = { key: `q${index}`, text: chunk, query: parsed.query, food, candidates, weak, typedUnit: parsed.unit, typedQty: parsed.qty };
     if (!food) return { ...base, unit: parsed.unit, qty: parsed.qty ?? 1, grams: 0, kcal: 0, p: 0, c: 0, f: 0 };
     return { ...base, ...resolveAmount(food, parsed.unit, parsed.qty) };
   });

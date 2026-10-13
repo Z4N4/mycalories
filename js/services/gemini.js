@@ -1,20 +1,16 @@
-// Food-photo analysis with Google Gemini (free tier). The user's own API key is
-// kept only on this phone, in its own storage slot (never in backups or the code).
-// Works with both old "standard" keys (AIza…) and the newer "auth" keys that
-// Google AI Studio creates since May 2026; both go in the x-goog-api-key header.
+// Google Gemini (free tier), kept as a second AI option next to Groq.
+// Works with old "AIza…" keys and the newer auth keys (both in x-goog-api-key;
+// a token-style fallback is remembered if Google asks for it).
 
-import { buildPrompt, parseAiResult, RESPONSE_SCHEMA, cleanKey } from '../core/photoAi.js';
-import { BUILT_IN } from '../foods/index.js';
+import { AiError, cleanKey } from './aiError.js';
 
 const API = 'https://generativelanguage.googleapis.com/v1beta/models';
-// Newest first; the next one is tried if a model is missing or busy.
-const MODELS = ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-2.5-flash'];
+// Only models open to new users (gemini-2.5-flash is closed to them).
+const MODELS = ['gemini-3.8-flash', 'gemini-3.6-flash'];
 const KEY_STORAGE = 'mycalories.geminiKey';
-// 'header' = x-goog-api-key (what Google documents); 'bearer' = fallback for keys
-// that Google only accepts as an Authorization token.
 const MODE_STORAGE = 'mycalories.geminiKeyMode';
-const TIMEOUT_MS = 45000;
-const TEST_TIMEOUT_MS = 20000;
+const TIMEOUT_MS = 25000;
+const TEST_TIMEOUT_MS = 15000;
 
 export function getKey() {
   try { return localStorage.getItem(KEY_STORAGE) ?? ''; } catch { return ''; }
@@ -40,15 +36,6 @@ export function setKey(key, mode = 'header') {
   }
 }
 
-/** Error with a code the UI translates, plus Google's own message for details. */
-export class AiError extends Error {
-  constructor(code, detail = '') {
-    super(code);
-    this.code = code; // 'noKey' | 'badKey' | 'quota' | 'offline' | 'failed'
-    this.detail = detail;
-  }
-}
-
 const authHeaders = (key, mode) => (mode === 'bearer' ? { Authorization: `Bearer ${key}` } : { 'x-goog-api-key': key });
 
 async function post(model, key, body, timeoutMs = TIMEOUT_MS, mode = getMode()) {
@@ -62,101 +49,68 @@ async function post(model, key, body, timeoutMs = TIMEOUT_MS, mode = getMode()) 
       signal: controller.signal,
     });
   } catch {
-    // A slow model is not the same as having no internet.
-    throw new AiError(controller.signal.aborted ? 'failed' : 'offline');
+    throw new AiError(controller.signal.aborted ? 'failed' : 'offline', controller.signal.aborted ? 'The AI took too long.' : '');
   } finally {
     clearTimeout(timer);
   }
 }
 
-function photoBody(image, withSchema) {
-  return {
-    contents: [{
-      parts: [
-        { inline_data: { mime_type: image.mime, data: image.base64 } },
-        { text: buildPrompt(BUILT_IN) },
-      ],
-    }],
-    generationConfig: {
-      temperature: 0.2,
-      responseMimeType: 'application/json',
-      ...(withSchema ? { responseJsonSchema: RESPONSE_SCHEMA } : {}),
-    },
-  };
-}
-
-/** Sort a failed response into something the app can act on, keeping Google's message. */
 async function classify(res) {
   const body = await res.json().catch(() => ({}));
   const detail = String(body?.error?.message ?? `HTTP ${res.status}`).slice(0, 300);
   const status = String(body?.error?.status ?? '');
-  let code = 'failed';
-  if (res.status === 429 || status === 'RESOURCE_EXHAUSTED') code = 'quota';
-  else if (/api key|api_key|unauthenticated|credential/i.test(detail) || res.status === 401) code = 'badKey';
-  else if (res.status === 403) code = 'badKey';
-  else if (res.status === 404 || res.status >= 500) code = 'tryNextModel';
-  else if (res.status === 400 && /schema|json/i.test(detail)) code = 'noSchema';
-  return { code, detail };
+  if (res.status === 429 || status === 'RESOURCE_EXHAUSTED') return new AiError('quota', detail);
+  if (res.status === 401 || res.status === 403 || /api key|credential|unauthenticated/i.test(detail)) return new AiError('badKey', detail);
+  return new AiError('failed', detail);
 }
 
 /**
- * @param {{base64: string, mime: string}} image
- * @param {Map<string, object>} foodsById
+ * Ask Gemini for JSON, optionally about a photo. The first model's error is the
+ * one reported (it's the one that matters), not the last fallback's.
+ * @param {{prompt: string, image?: {base64: string, mime: string}}} opts
+ * @returns {Promise<string>} the answer text
  */
-export async function analyzePhoto(image, foodsById) {
+export async function geminiJson({ prompt, image }) {
   const key = getKey();
   if (!key) throw new AiError('noKey');
   if (!navigator.onLine) throw new AiError('offline');
-  let last = { code: 'failed', detail: '' };
+  const parts = [...(image ? [{ inline_data: { mime_type: image.mime, data: image.base64 } }] : []), { text: prompt }];
+  const body = { contents: [{ parts }], generationConfig: { temperature: 0.2, responseMimeType: 'application/json' } };
+  let first = null;
   for (const model of MODELS) {
-    let withSchema = true;
-    for (let attempt = 0; attempt < 2; attempt += 1) {
-      const res = await post(model, key, photoBody(image, withSchema));
-      if (res.ok) {
-        const data = await res.json();
-        const text = data?.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
-        try {
-          return parseAiResult(text, foodsById);
-        } catch {
-          throw new AiError('failed', 'The answer could not be read.');
-        }
-      }
-      const result = await classify(res);
-      if (result.code === 'noSchema' && withSchema) { withSchema = false; continue; }
-      if (result.code === 'badKey') throw new AiError('badKey', result.detail);
-      last = { code: result.code === 'quota' ? 'quota' : 'failed', detail: result.detail };
-      break; // try the next model
+    const res = await post(model, key, body);
+    if (res.ok) {
+      const data = await res.json();
+      return data?.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
     }
+    const err = await classify(res);
+    if (err.code === 'badKey') throw err;
+    first ??= err;
   }
-  throw new AiError(last.code, last.detail);
+  throw first;
 }
 
-/**
- * Checks a key with a tiny real request (the same kind the photo feature makes).
- * Tries the documented header first; if Google says it expected a token, tries
- * that once. The working way is returned so it can be saved with the key.
- * @returns {Promise<{status: 'ok'|'quota'|'badKey'|'offline'|'failed', detail: string, mode: string}>}
- */
+/** Checks a key with a tiny real request; returns the way of sending it that works. */
 export async function testKey(rawKey) {
   const key = cleanKey(rawKey);
   const body = { contents: [{ parts: [{ text: 'Reply with the word OK.' }] }], generationConfig: { maxOutputTokens: 20 } };
-  let last = { status: 'failed', detail: '', mode: 'header' };
+  let first = null;
   for (const mode of ['header', 'bearer']) {
     for (const model of MODELS) {
       let res;
       try {
         res = await post(model, key, body, TEST_TIMEOUT_MS, mode);
       } catch (err) {
-        return { status: err.code === 'offline' ? 'offline' : 'failed', detail: '', mode };
+        return { status: err.code, detail: err.detail, mode };
       }
       if (res.ok) return { status: 'ok', detail: '', mode };
-      const { code, detail } = await classify(res);
-      if (code === 'quota') return { status: 'quota', detail, mode }; // the key itself is fine
-      if (code === 'badKey') { last = { status: 'badKey', detail, mode }; break; }
-      last = { status: 'failed', detail, mode };
+      const err = await classify(res);
+      if (err.code === 'quota') return { status: 'quota', detail: err.detail, mode };
+      first ??= { status: err.code, detail: err.detail, mode };
+      if (err.code === 'badKey') break;
     }
-    // Only try the token form when Google explicitly asked for a token.
-    if (last.status !== 'badKey' || !/oauth|access token/i.test(last.detail)) break;
+    if (!(first?.status === 'badKey' && /oauth|access token/i.test(first.detail))) break;
+    first = null;
   }
-  return last;
+  return first ?? { status: 'failed', detail: '', mode: 'header' };
 }

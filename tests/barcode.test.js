@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cleanBarcode, isValidBarcode, productFromOff } from '../js/core/barcode.js';
+import { cleanBarcode, isValidBarcode, productFromOff, productsFromSearch } from '../js/core/barcode.js';
 
 test('cleanBarcode keeps digits only, including Arabic digits', () => {
   assert.equal(cleanBarcode(' 5449 0000-00996 '), '5449000000996');
@@ -60,4 +60,39 @@ test('productFromOff returns null when not found or without calories', () => {
   assert.equal(productFromOff({ status: 0 }, '1', 'en'), null);
   assert.equal(productFromOff({ status: 1, product: { product_name: 'X', nutriments: {} } }, '1', 'en'), null);
   assert.equal(productFromOff(null, '1', 'en'), null);
+});
+
+test('productsFromSearch turns Open Food Facts search results into foods, skipping bad ones', () => {
+  const json = {
+    products: [
+      { code: '9002490100070', product_name: 'Red Bull', brands: 'Red Bull', serving_quantity: 250, nutriments: { 'energy-kcal_100g': 46, carbohydrates_100g: 11 } },
+      { code: '9002490100070', product_name: 'Red Bull', brands: 'Red Bull', serving_quantity: 250, nutriments: { 'energy-kcal_100g': 46, carbohydrates_100g: 11 } },
+      { code: '123', product_name: 'No calories', nutriments: {} },
+      { code: '456', product_name: 'Broken', nutriments: { 'energy-kcal_100g': 5000 } },
+      { product_name: 'Sugar free', brands: 'X', nutriments: { 'energy-kcal_100g': 3 } },
+    ],
+  };
+  const list = productsFromSearch(json, 'en');
+  assert.equal(list.length, 2);
+  assert.equal(list[0].kcal, 115);
+  assert.equal(list[0].barcode, '9002490100070');
+  assert.equal(list[1].barcode, '');
+  assert.deepEqual(productsFromSearch(null, 'en'), []);
+});
+
+test('calories that do not fit the label macros are corrected (kJ typed as kcal)', () => {
+  const wrong = { status: 1, product: { product_name: 'Red Bull Energy Drink', serving_quantity: 250, nutriments: { 'energy-kcal_100g': 463, carbohydrates_100g: 11, proteins_100g: 0, fat_100g: 0 } } };
+  assert.equal(productFromOff(wrong, '', 'en').kcal, 110); // 44 kcal/100 ml × 2.5
+  const fine = { status: 1, product: { product_name: 'Oil', nutriments: { 'energy-kcal_100g': 884, fat_100g: 100 } } };
+  assert.equal(productFromOff(fine, '', 'en').kcal, 884);
+});
+
+test('search results show the brand when the name lacks it', () => {
+  const json = { products: [{ product_name: 'Energy Drink', brands: 'Red Bull', nutriments: { 'energy-kcal_100g': 46, carbohydrates_100g: 11 } }] };
+  assert.equal(productsFromSearch(json, 'en')[0].name, 'Energy Drink (Red Bull)');
+});
+
+test('a 0 kcal sweetener with sugar alcohols is not turned into 400 kcal', () => {
+  const sweetener = { status: 1, product: { product_name: 'Sweetener', nutriments: { 'energy-kcal_100g': 0, carbohydrates_100g: 99 } } };
+  assert.equal(productFromOff(sweetener, '', 'en').kcal, 0);
 });

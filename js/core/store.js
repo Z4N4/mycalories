@@ -25,6 +25,7 @@ export function createInitialState() {
     overrides: {},
     recipes: {},
     planSwaps: {},
+    savedMeals: [], // [{id, name, items: [entry without id/meal]}]
     favorites: [],
     recent: [],
     weights: {},
@@ -62,6 +63,24 @@ export function copyMeal(state, fromKey, toKey, meal) {
     .filter((e) => e.meal === meal)
     .map((e) => ({ ...e, id: newId() }));
   return withDay(state, toKey, [...(state.log[toKey] ?? []), ...copies]);
+}
+
+const MAX_SAVED_MEALS = 50;
+const MAX_MEAL_ITEMS = 30;
+
+/** Save a meal's entries under a name, to add them all again later with one tap. */
+export function saveMeal(state, name, entries) {
+  const items = entries.slice(0, MAX_MEAL_ITEMS).map(({ id: _id, meal: _meal, ...rest }) => ({ ...rest }));
+  const meal = { id: newId('m'), name: String(name).trim().slice(0, 40), items };
+  return { ...state, savedMeals: [meal, ...state.savedMeals].slice(0, MAX_SAVED_MEALS) };
+}
+
+export function addSavedMeal(state, key, meal, saved) {
+  return saved.items.reduce((s, item) => addEntry(s, key, { ...item, meal }), state);
+}
+
+export function deleteSavedMeal(state, id) {
+  return { ...state, savedMeals: state.savedMeals.filter((m) => m.id !== id) };
 }
 
 export function toggleFavorite(state, foodId) {
@@ -222,6 +241,14 @@ export function parseBackup(text) {
   const recipes = isObj(raw.recipes)
     ? Object.fromEntries(Object.entries(raw.recipes).map(([k, v]) => [k, cleanRecipeItems(v)]).filter(([, v]) => v))
     : {};
+  const savedMeals = Array.isArray(raw.savedMeals)
+    ? raw.savedMeals.map((m) => {
+      if (!isObj(m) || typeof m.name !== 'string' || !m.name.trim() || !Array.isArray(m.items)) return null;
+      const items = m.items.slice(0, MAX_MEAL_ITEMS).map((e) => cleanEntry({ ...e, meal: 'lunch' }))
+        .filter(Boolean).map(({ id: _id, meal: _meal, ...rest }) => rest);
+      return items.length ? { id: typeof m.id === 'string' ? m.id.slice(0, 40) : newId('m'), name: m.name.trim().slice(0, 40), items } : null;
+    }).filter(Boolean).slice(0, MAX_SAVED_MEALS)
+    : [];
   const planStyle = raw.settings?.planStyle === 'simple' ? 'simple' : 'traditional';
   const planSwaps = isObj(raw.planSwaps)
     ? Object.fromEntries(Object.entries(raw.planSwaps)
@@ -241,6 +268,7 @@ export function parseBackup(text) {
     overrides,
     recipes,
     planSwaps,
+    savedMeals,
     favorites: cleanIds(raw.favorites),
     recent: cleanIds(raw.recent).slice(0, MAX_RECENT),
     weights,

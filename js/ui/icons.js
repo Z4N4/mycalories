@@ -34,6 +34,7 @@ const PATHS = {
   stats: '<path d="M5 19V11M10 19V6M15 19v-9M20 19V8"/>',
   swap: '<path d="M7 7h11l-3-3M17 17H6l3 3"/>',
   list: '<path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/>',
+  bookmark: '<path d="M6.5 4h11a1 1 0 0 1 1 1v15l-6.5-4-6.5 4V5a1 1 0 0 1 1-1z"/>',
   reset: '<path d="M4 12a8 8 0 1 0 2.4-5.7L4 8.5"/><path d="M4 4v4.5h4.5"/>',
 };
 

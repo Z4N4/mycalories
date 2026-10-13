@@ -10,7 +10,7 @@ import { nutritionFor } from '../core/calc.js';
 import { MEALS, addEntry } from '../core/store.js';
 import { foodName } from '../foods/index.js';
 import { MEAL_NAMES } from '../i18n/strings.js';
-import { analyzePhoto, getKey, AiError } from '../services/gemini.js';
+import { identifyPhoto, aiAvailable, AiError } from '../services/ai.js';
 import { shrinkImage } from '../services/image.js';
 import { openCamera } from '../ui/camera.js';
 
@@ -141,7 +141,7 @@ export function openPhotoFood(app, { dateKey, meal: startMeal, onChange }) {
     sheet.setFooter(null);
     let image;
     try {
-      image = await shrinkImage(photo);
+      image = await shrinkImage(photo, 768); // smaller photo = faster answer, fewer tokens
     } catch {
       sheet.setBody(errorView('failed', h('p', { class: 'field-error center' }, t('imageUnreadable'))));
       return;
@@ -149,7 +149,7 @@ export function openPhotoFood(app, { dateKey, meal: startMeal, onChange }) {
     const preview = h('img', { class: 'photo-preview', src: image.dataUrl, alt: '' });
     sheet.setBody(h('div', { class: 'stack' }, preview, h('div', { class: 'analyzing' }, h('span', { class: 'spinner' }), t('analyzing'))));
     try {
-      const found = await analyzePhoto(image, app.d.foodsById);
+      const found = await identifyPhoto(image, app.d.foods);
       items = found.map((i) => ({ ...i, on: true }));
       sheet.setBody(resultsView(preview));
     } catch (err) {
@@ -162,7 +162,7 @@ export function openPhotoFood(app, { dateKey, meal: startMeal, onChange }) {
     title: t('photoTitle'),
     closeLabel: t('close'),
     tall: true,
-    body: getKey() ? startView() : noKeyBody(app, t),
+    body: aiAvailable() ? startView() : noKeyBody(app, t),
   });
-  if (getKey()) camera(); // go straight to the camera
+  if (aiAvailable()) camera(); // go straight to the camera
 }

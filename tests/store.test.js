@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   createInitialState, addEntry, updateEntry, removeEntry, copyMeal, toggleFavorite,
   saveCustomFood, deleteCustomFood, setOverride, clearOverride, setWeight, removeWeight,
-  setProfile, setSettings, parseBackup, findCustomByBarcode, MAX_RECENT,
+  setProfile, setSettings, parseBackup, findCustomByBarcode, MAX_RECENT, saveMeal, addSavedMeal, deleteSavedMeal,
 } from '../js/core/store.js';
 
 const entry = (over = {}) => ({
@@ -149,4 +149,33 @@ test('parseBackup drops malformed entries and fills missing fields', () => {
   assert.equal(restored.log['2026-10-12'].length, 1);
   assert.equal(restored.settings.lang, 'ku');
   assert.deepEqual(restored.favorites, []);
+});
+
+test('saved meals: save entries as a meal, add them back in one go, delete', () => {
+  let s = addEntry(createInitialState(), '2026-10-12', entry({ meal: 'breakfast', foodId: 'samoon', kcal: 216 }));
+  s = addEntry(s, '2026-10-12', entry({ meal: 'breakfast', foodId: 'egg_boiled', kcal: 155 }));
+  s = saveMeal(s, 'My breakfast', s.log['2026-10-12']);
+  assert.equal(s.savedMeals.length, 1);
+  const saved = s.savedMeals[0];
+  assert.equal(saved.name, 'My breakfast');
+  assert.equal(saved.items.length, 2);
+  assert.equal(saved.items[0].id, undefined);
+  s = addSavedMeal(s, '2026-10-13', 'lunch', saved);
+  assert.deepEqual(s.log['2026-10-13'].map((e) => [e.foodId, e.meal]), [['samoon', 'lunch'], ['egg_boiled', 'lunch']]);
+  assert.notEqual(s.log['2026-10-13'][0].id, s.log['2026-10-12'][0].id);
+  s = deleteSavedMeal(s, saved.id);
+  assert.equal(s.savedMeals.length, 0);
+});
+
+test('parseBackup keeps valid saved meals only', () => {
+  const raw = {
+    version: 1,
+    savedMeals: [
+      { id: 'm_1', name: 'Breakfast', items: [entry()] },
+      { id: 'm_2', name: '', items: [entry()] },
+      { id: 'm_3', name: 'Empty', items: [] },
+    ],
+  };
+  const s = parseBackup(JSON.stringify(raw));
+  assert.deepEqual(s.savedMeals.map((m) => m.name), ['Breakfast']);
 });

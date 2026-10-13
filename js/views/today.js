@@ -13,6 +13,7 @@ import { entryName } from '../foods/index.js';
 import { openAddFood } from '../sheets/addFood.js';
 import { openEntry } from '../sheets/foodDetail.js';
 import { installCard } from './installCard.js';
+import { openSaveMeal } from '../sheets/savedMeals.js';
 
 function dateNav(app, key) {
   const { t, lang } = app.d;
@@ -91,6 +92,10 @@ function mealCard(app, key, meal, entries) {
     h('header', { class: 'meal-header' },
       h('h3', null, MEAL_NAMES[meal][lang]),
       h('span', { class: 'meal-kcal' }, entries.length ? `${fmt(total)} ${t('kcal')}` : ''),
+      entries.length ? h('button', {
+        class: 'icon-btn small', 'aria-label': t('saveMeal'), title: t('saveMeal'),
+        onClick: () => openSaveMeal(app, meal, entries),
+      }, icon('bookmark')) : '',
       h('button', {
         class: 'icon-btn small', 'aria-label': t('copyYesterday'), title: t('copyYesterday'),
         onClick: () => copyFromYesterday(app, key, meal),
